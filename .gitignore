@@ -1,0 +1,7 @@
+/.idea
+/out
+/team1-code
+/team7-code
+*.class
+*.DS_Store
+*.iml
