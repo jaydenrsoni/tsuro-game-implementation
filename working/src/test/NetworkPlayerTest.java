@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkPlayerTest {
+
     @Test
     public void getNameTest() {
         NetworkPlayer player = new NetworkPlayer();

@@ -2,6 +2,7 @@ package main;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -140,6 +141,17 @@ public class Tile {
         return ret + "}";
     }
 
+    public Element encodeTile(Document doc) {
+        Element tileElement = doc.createElement("tile");
+
+        for(TileConnection connect : connections) {
+            Element connectElement = connect.encodeConnect(doc);
+            tileElement.appendChild(connectElement);
+        }
+
+        return tileElement;
+    }
+
     //================================================================================
     // Private helper methods
     //================================================================================
@@ -224,6 +236,22 @@ public class Tile {
             return "(" + endpointA + ", " + endpointB + ")";
         }
 
+
+        public Element encodeConnect(Document doc) {
+            Element connectElement = doc.createElement("connect");
+
+            Element nNodeA = doc.createElement("n");
+            Element nNodeB = doc.createElement("n");
+            Text natA = doc.createTextNode(String.valueOf(endpointA));
+            Text natB = doc.createTextNode(String.valueOf(endpointB));
+
+            nNodeA.appendChild(natA);
+            nNodeB.appendChild(natB);
+            connectElement.appendChild(nNodeA);
+            connectElement.appendChild(nNodeB);
+
+            return connectElement;
+        }
     }
 
 }

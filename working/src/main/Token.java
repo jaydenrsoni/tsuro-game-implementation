@@ -1,6 +1,9 @@
 package main;
 
 import javafx.util.Pair;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 /**
  * Created by vyasalwar on 4/16/18.
@@ -81,6 +84,19 @@ public class Token {
         }
         throw new IllegalArgumentException("Invalid tokenSpace");
     }
+
+    public Element encodePawn(Document doc) {
+        Element boardElement = doc.createElement("board");
+        Text colorText = doc.createTextNode(this.name().toLowerCase());
+        colorElement.appendChild(colorText);
+        return colorElement;
+    }
+
+    //================================================================================
+    // Private helper methods
+    //================================================================================
+
+    private
 
 
 }

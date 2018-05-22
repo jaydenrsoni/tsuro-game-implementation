@@ -1,6 +1,9 @@
 package main;
 
 import javafx.util.Pair;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import java.util.*;
 
@@ -127,6 +130,17 @@ public class Board {
         return null;
     }
 
+    public Element encodeBoard(Document doc) {
+        Element boardElement = doc.createElement("board");
+        Element tilesNode = encodeTiles(doc);
+        Element pawnsNode = encodePawns(doc);
+
+        boardElement.appendChild(tilesNode);
+        boardElement.appendChild(pawnsNode);
+
+        return boardElement;
+    }
+
     //================================================================================
     // Private Helpers
     //================================================================================
@@ -237,5 +251,41 @@ public class Board {
         int col = token.getBoardSpace().getCol();
         int tokenSpace = token.getTokenSpace();
         return isOnEdge(row, col, tokenSpace);
+    }
+
+    private Element encodeTiles(Document doc) {
+        Element tilesElement = doc.createElement("map");
+
+        for (int row = 0; row < BOARD_LENGTH; row++) {
+            for (int col = 0; col < BOARD_LENGTH; col++) {
+                BoardSpace boardSpace = getBoardSpace(row, col);
+                if (boardSpace.hasTile()) {
+                    Element entElement = doc.createElement("ent");
+                    Element xyNode = encodeXY(doc, row, col);
+                    Element tileNode = boardSpace.getTile().encodeTile(doc);
+
+                    entElement.appendChild(xyNode);
+                    entElement.appendChild(tileNode);
+                    tilesElement.appendChild(entElement);
+                }
+            }
+        }
+
+        return tilesElement;
+    }
+
+    private Element encodeXY(Document doc, int x, int y) {
+        Element xyElement = doc.createElement("xy");
+        Element xNode = doc.createElement("x");
+        Element yNode = doc.createElement("y");
+        Text xText = doc.createTextNode(String.valueOf(x));
+        Text yText = doc.createTextNode(String.valueOf(y));
+
+        xNode.appendChild(xText);
+        yNode.appendChild(yText);
+        xyElement.appendChild(xNode);
+        xyElement.appendChild(yNode);
+
+        return xyElement;
     }
 }

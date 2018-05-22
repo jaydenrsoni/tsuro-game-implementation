@@ -43,6 +43,8 @@ public class NetworkPlayer implements IPlayer {
         message.appendChild(nameTag);
 
         transformText(message);
+
+        //decode here
         return "";
     }
 
@@ -51,11 +53,11 @@ public class NetworkPlayer implements IPlayer {
         Document message = docBuilder.newDocument();
 
         Element nameTag = message.createElement("initialize");
-        Element color = playerColor.encodeColor(message);
-        Element listOfColors = this.encodeListOfColors(message, otherPlayerColors);
+        Element colorNode = playerColor.encodeColor(message);
+        Element listOfColorsNode = this.encodeListOfColors(message, otherPlayerColors);
 
-        nameTag.appendChild(color);
-        nameTag.appendChild(listOfColors);
+        nameTag.appendChild(colorNode);
+        nameTag.appendChild(listOfColorsNode);
 
         message.appendChild(nameTag);
 
@@ -64,7 +66,10 @@ public class NetworkPlayer implements IPlayer {
 
     @Override
     public Pair<BoardSpace, Integer> placePawn(Board board) {
-        return null;
+        Document message = docBuilder.newDocument();
+
+        Element nameTag = message.createElement("place-pawn");
+        Element boardNode = board.encodeBoard(message);
     }
 
     @Override
