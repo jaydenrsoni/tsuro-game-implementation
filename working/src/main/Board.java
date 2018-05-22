@@ -256,6 +256,9 @@ public class Board {
     private Element encodeTiles(Document doc) {
         Element tilesElement = doc.createElement("map");
 
+        Text tilesText = doc.createTextNode(" ");
+        tilesElement.appendChild(tilesText);
+
         for (int row = 0; row < BOARD_LENGTH; row++) {
             for (int col = 0; col < BOARD_LENGTH; col++) {
                 BoardSpace boardSpace = getBoardSpace(row, col);
@@ -287,5 +290,32 @@ public class Board {
         xyElement.appendChild(yNode);
 
         return xyElement;
+    }
+
+    private Element encodePawns(Document doc) {
+        Element pawnsElement = doc.createElement("map");
+
+        Text pawnsText = doc.createTextNode(" ");
+        pawnsElement.appendChild(pawnsText);
+
+        for (int row = 0; row < BOARD_LENGTH; row++) {
+            for (int col = 0; col < BOARD_LENGTH; col++) {
+                BoardSpace boardSpace = getBoardSpace(row, col);
+                if (boardSpace.hasToken()) {
+                    Set<Token> tokens = boardSpace.getTokensOnSpace();
+                    for(Token token : tokens){
+                        Element entElement = doc.createElement("ent");
+                        Element colorNode = token.getColor().encodeColor(doc);
+                        Element pawnLocNode = token.encodePawnLoc(doc);
+
+                        entElement.appendChild(colorNode);
+                        entElement.appendChild(pawnLocNode);
+                        pawnsElement.appendChild(entElement);
+                    }
+                }
+            }
+        }
+
+        return pawnsElement;
     }
 }

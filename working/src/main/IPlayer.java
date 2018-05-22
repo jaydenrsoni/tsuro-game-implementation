@@ -1,9 +1,8 @@
 package main;
 
 import javafx.util.Pair;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public interface IPlayer {
 
@@ -15,5 +14,5 @@ public interface IPlayer {
 
     Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft);
 
-    void endGame(Board board, List<Color> winningColors);
+    void endGame(Board board, Set<Color> winningColors);
 }

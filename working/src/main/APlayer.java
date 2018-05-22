@@ -50,7 +50,7 @@ public abstract class APlayer implements IPlayer {
 
     abstract public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft);
 
-    public void endGame(Board board, List<Color> winningColors){
+    public void endGame(Board board, Set<Color> winningColors){
         // Do something?
     }
 

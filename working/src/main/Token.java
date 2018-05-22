@@ -85,18 +85,114 @@ public class Token {
         throw new IllegalArgumentException("Invalid tokenSpace");
     }
 
-    public Element encodePawn(Document doc) {
-        Element boardElement = doc.createElement("board");
-        Text colorText = doc.createTextNode(this.name().toLowerCase());
-        colorElement.appendChild(colorText);
-        return colorElement;
+    public Element encodePawnLoc(Document doc) {
+        int tokenSpace = getTokenSpace();
+        int row = getBoardSpace().getRow();
+        int col = getBoardSpace().getCol();
+
+        Element pawnLocElement = doc.createElement("pawn-loc");
+        Element hvNode = encodeHv(doc, tokenSpace);
+        Element n1Node = encodeN1(doc, tokenSpace, row, col);
+        Element n2Node = encodeN2(doc, tokenSpace, row, col);
+
+
+        pawnLocElement.appendChild(hvNode);
+        pawnLocElement.appendChild(n1Node);
+        pawnLocElement.appendChild(n2Node);
+
+        return pawnLocElement;
+    }
+
+    private Element encodeHv(Document doc, int tokenSpace) {
+        Element hvNode;
+        switch(tokenSpace){
+            case 0:
+            case 1:
+            case 4:
+            case 5:
+                hvNode = doc.createElement("h");
+                break;
+            case 2:
+            case 3:
+            case 6:
+            case 7:
+                hvNode = doc.createElement("v");
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        Text hvText = doc.createTextNode(" ");
+        hvNode.appendChild(hvText);
+
+        return hvNode;
+    }
+
+    private Element encodeN1(Document doc, int tokenSpace, int row, int col) {
+        Element n1Node = doc.createElement("n");
+        Text n1Text;
+        switch(tokenSpace) {
+            case 0:
+            case 1:
+                n1Text = doc.createTextNode(String.valueOf(row));
+                break;
+            case 2:
+            case 3:
+                n1Text = doc.createTextNode(String.valueOf(col + 1));
+                break;
+            case 4:
+            case 5:
+                n1Text = doc.createTextNode(String.valueOf(row + 1));
+                break;
+            case 6:
+            case 7:
+                n1Text = doc.createTextNode(String.valueOf(col));
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        n1Node.appendChild(n1Text);
+        return n1Node;
+    }
+
+    private Element encodeN2(Document doc, int tokenSpace, int row, int col) {
+        Element n2Node = doc.createElement("n");
+        Text n2Text;
+        switch (tokenSpace) {
+            case 0:
+            case 5:
+                n2Text = doc.createTextNode(String.valueOf(col*2));
+                break;
+            case 1:
+            case 4:
+                n2Text = doc.createTextNode(String.valueOf(col*2 + 1));
+                break;
+            case 2:
+            case 7:
+                n2Text = doc.createTextNode(String.valueOf(row*2));
+                break;
+            case 3:
+            case 6:
+                n2Text = doc.createTextNode(String.valueOf(row*2 + 1));
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        n2Node.appendChild(n2Text);
+        return n2Node;
     }
 
     //================================================================================
     // Private helper methods
     //================================================================================
 
-    private
+//    private ServerPawnLoc getServerPawnLoc() {
+//
+//    }
+//
+//    private class ServerPawnLoc
 
 
 }

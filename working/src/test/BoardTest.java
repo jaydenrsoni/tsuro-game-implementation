@@ -1,8 +1,6 @@
 //package test;
 //
 //import main.*;
-//import main.Players.APlayer;
-//import main.Players.RandomPlayer;
 //import org.junit.Test;
 //import org.junit.Assert;
 //

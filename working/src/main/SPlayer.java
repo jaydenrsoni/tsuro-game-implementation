@@ -19,7 +19,7 @@ public class SPlayer {
     private Color color;
     private List<Color> otherPlayerColors;
 
-    SPlayer(IPlayer iplayer, TilePile tilePile){
+    public SPlayer(IPlayer iplayer, TilePile tilePile){
         this.iplayer = iplayer;
         this.tilePile = tilePile;
         this.curState = State.GAMEENDED;
@@ -73,7 +73,7 @@ public class SPlayer {
         return iplayer.playTurn(board, hand, tilePile.size());
     }
 
-    public void endGame(Board board, List<Color> winningColors){
+    public void endGame(Board board, Set<Color> winningColors){
         if (curState != State.TURNPLAYABLE)
             throw new ContractException();
 

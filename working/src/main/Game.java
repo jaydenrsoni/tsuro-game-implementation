@@ -154,7 +154,7 @@ public class Game {
 
 
     // Main game loop
-    public List<Color> playGame(){
+    public Set<Color> playGame(){
         initializePlayers();
 
         for (SPlayer splayer: remainingPlayers) {
@@ -193,7 +193,7 @@ public class Game {
 //                i = (i + 1) % remainingPlayers.size();
         }
 
-        List<Color> winningColors = new ArrayList<>();
+        Set<Color> winningColors = new HashSet<>();
         for (SPlayer splayer : remainingPlayers) {
             winningColors.add(splayer.getColor());
         }

@@ -74,6 +74,10 @@ public class BoardSpace {
         return tile != null;
     }
 
+    public boolean hasToken() {
+        return !tokenSpaces.isEmpty();
+    }
+
     // Move all tokens on the tile to their opposite endpoints
     public void advanceTokens(){
         Set<Token> tokensOnSpace = getTokensOnSpace();
