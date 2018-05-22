@@ -12,14 +12,16 @@ public class Token {
     //================================================================================
     private BoardSpace space;
     private SPlayer player;
+    private Color color;
 
     //================================================================================
     // Constructor
     //================================================================================
-    public Token(BoardSpace startingLocation, int startingTokenSpace, SPlayer player){
+    public Token(BoardSpace startingLocation, int startingTokenSpace, SPlayer player, Color color){
         space = startingLocation;
         this.player = player;
         space.addToken(this, startingTokenSpace);
+        this.color = color;
     }
 
     //================================================================================
@@ -36,6 +38,10 @@ public class Token {
 
     public SPlayer getPlayer(){
         return player;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     //================================================================================

@@ -1,7 +1,5 @@
 package main;
 
-import javafx.util.Pair;
-
 import java.util.*;
 
 public class Game {
@@ -150,7 +148,7 @@ public class Game {
         }
 
         for(int i = 0; i < remainingPlayers.size(); i++){
-            remainingPlayers.get(i).initialize(startingColorList.get(i), startingColorList);
+            remainingPlayers.get(i).initializeSPlayer(startingColorList.get(i), startingColorList);
         }
     }
 

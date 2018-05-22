@@ -98,7 +98,7 @@ public class BoardSpace {
 
     public int findColor(Color color){
         for (Token token : tokenSpaces.keySet()){
-            if(token.getPlayer().getColor() == color){
+            if(token.getColor() == color){
                 return tokenSpaces.get(token);
             }
         }

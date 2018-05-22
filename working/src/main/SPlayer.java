@@ -15,12 +15,14 @@ public class SPlayer {
     private Token token;
     private List<Tile> hand;
     private TilePile tilePile;
-    private APlayer aplayer;
+    private IPlayer iplayer;
+    private Color color;
+    private List<Color> otherPlayerColors;
 
-    SPlayer(APlayer aplayer, TilePile tilePile){
-        this.aplayer = aplayer;
+    SPlayer(IPlayer iplayer, TilePile tilePile){
+        this.iplayer = iplayer;
         this.tilePile = tilePile;
-        this.curState = State.UNINITIALIZED;
+        this.curState = State.GAMEENDED;
         this.token = null;
         this.hand = new ArrayList<>();
 
@@ -33,14 +35,16 @@ public class SPlayer {
     // APlayer calls
     //================================================================================
     public String getName() {
-        return aplayer.getName();
+        return iplayer.getName();
     }
 
-    public void initialize(Color playerColor, List<Color> otherPlayerColors){
-        if (curState != State.UNINITIALIZED)
+    public void initializeSPlayer(Color playerColor, List<Color> otherPlayerColors){
+        if (curState != State.GAMEENDED)
             throw new ContractException();
 
-        aplayer.initialize(playerColor, otherPlayerColors);
+        this.color = playerColor;
+        this.otherPlayerColors = otherPlayerColors;
+        iplayer.initialize(playerColor, otherPlayerColors);
         this.curState = State.INITIALIZED;
     }
 
@@ -48,8 +52,8 @@ public class SPlayer {
         if (curState != State.INITIALIZED)
             throw new ContractException();
 
-        Pair<BoardSpace, Integer> startingTokenLocation = aplayer.placePawn(board);
-        token = new Token(startingTokenLocation.getKey(), startingTokenLocation.getValue(), this);
+        Pair<BoardSpace, Integer> startingTokenLocation = iplayer.placePawn(board);
+        token = new Token(startingTokenLocation.getKey(), startingTokenLocation.getValue(), this, color);
         curState = State.TURNPLAYABLE;
     }
 
@@ -58,7 +62,7 @@ public class SPlayer {
         if (curState != State.INITIALIZED)
             throw new ContractException();
 
-        token = new Token(startingLocation, startingTokenSpace, this);
+        token = new Token(startingLocation, startingTokenSpace, this, color);
         curState = State.TURNPLAYABLE;
     }
 
@@ -66,14 +70,14 @@ public class SPlayer {
         if (curState != State.TURNPLAYABLE || !isValidHand())
             throw new ContractException();
 
-        return aplayer.playTurn(board, hand, tilePile.size());
+        return iplayer.playTurn(board, hand, tilePile.size());
     }
 
     public void endGame(Board board, List<Color> winningColors){
         if (curState != State.TURNPLAYABLE)
             throw new ContractException();
 
-        aplayer.endGame(board, winningColors);
+        iplayer.endGame(board, winningColors);
         curState = State.GAMEENDED;
     }
 
@@ -82,9 +86,7 @@ public class SPlayer {
         return token;
     }
 
-    public Color getColor(){
-        return aplayer.getColor();
-    }
+    public Color getColor() { return this.color; }
 
 
     public Tile getTile(int i){
@@ -187,10 +189,8 @@ public class SPlayer {
     }
 
     public void replaceWithRandom(){
-        Color color = aplayer.getColor();
-        List<Color> otherPlayers = aplayer.getOtherPlayers();
-        aplayer = new RandomPlayer(aplayer.getName());
-        aplayer.initialize(color, otherPlayers);
+        iplayer = new RandomPlayer(iplayer.getName());
+        iplayer.initialize(color, otherPlayerColors);
     }
 
 
@@ -205,7 +205,7 @@ public class SPlayer {
     //================================================================================
     // Sequential Contract
     //================================================================================
-    private enum State {UNINITIALIZED, INITIALIZED, TURNPLAYABLE, GAMEENDED};
+    private enum State {INITIALIZED, TURNPLAYABLE, GAMEENDED};
 
 
 }

@@ -1,5 +1,8 @@
 package main;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -220,7 +223,6 @@ public class Tile {
         public String toString() {
             return "(" + endpointA + ", " + endpointB + ")";
         }
-
 
     }
 

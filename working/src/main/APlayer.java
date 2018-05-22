@@ -4,7 +4,7 @@ import javafx.util.Pair;
 
 import java.util.*;
 
-public abstract class APlayer {
+public abstract class APlayer implements IPlayer {
 
     //================================================================================
     // Instance Variables
@@ -13,7 +13,6 @@ public abstract class APlayer {
     private String name;
     private Color color;
     private List<Color> otherPlayers;
-
 
     //================================================================================
     // Constructor
