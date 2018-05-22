@@ -1,7 +1,6 @@
-package main.Players;
+package main;
 
 import javafx.util.Pair;
-import main.*;
 
 import java.util.Random;
 
@@ -11,13 +10,13 @@ import java.util.Random;
  */
 public class LeastSymmetricPlayer extends ScorePlayer {
 
-    public LeastSymmetricPlayer(String name, Color color) {
-        super(name, color);
+    public LeastSymmetricPlayer(String name) {
+        super(name);
     }
 
     @Override
     public Pair<BoardSpace, Integer> getStartingLocation(){
-        return RandomPlayer.getRandomStartingLocation(new Random());
+        return getRandomStartingLocation(new Random());
     }
 
     // Order tiles from least to most symmetric, and choose the first legal rotation among them

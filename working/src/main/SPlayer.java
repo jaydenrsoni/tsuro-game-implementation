@@ -1,89 +1,54 @@
-package main.Players;
+package main;
 
 import javafx.util.Pair;
-import main.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class APlayer {
+public class SPlayer {
 
-    //================================================================================
-    // Instance Variables
-    //================================================================================
     private final int MAX_TILES_IN_BANK = 3;
 
-    private String name;
-    private Color color;
-    private List<Token> otherPlayers;
     private State curState;
     private Token token;
     private List<Tile> hand;
     private TilePile tilePile;
+    private APlayer aplayer;
 
-    //================================================================================
-    // Constructor
-    //================================================================================
-    public APlayer(String name, Color color){
-        this.name = name;
-        this.color = color;
-        curState = State.UNINITIALIZED;
-
-        token = null;
-        hand = new ArrayList<>();
-        this.tilePile = Game.getGame().getTilePile();
+    SPlayer(APlayer aplayer, TilePile tilePile){
+        this.aplayer = aplayer;
+        this.tilePile = tilePile;
+        this.curState = State.UNINITIALIZED;
+        this.token = null;
+        this.hand = new ArrayList<>();
 
         for(int i = 0; i < MAX_TILES_IN_BANK; i++){
             drawFromPile();
         }
     }
 
-    public APlayer(APlayer other){
-        name = other.name;
-        color = other.color;
-        otherPlayers = new ArrayList<>(other.otherPlayers);
-        curState = other.curState;
-        token = other.token;
-        this.hand = new ArrayList<>(other.hand);
-        tilePile = other.tilePile;
-    }
-
     //================================================================================
-    // Getters
+    // APlayer calls
     //================================================================================
-    public Color getColor() {
-        return color;
+    public String getName() {
+        return aplayer.getName();
     }
 
-    public String getName(){
-        return name;
+    public void initialize(Color playerColor, List<Color> otherPlayerColors){
+        if (curState != State.UNINITIALIZED)
+            throw new ContractException();
+
+        aplayer.initialize(playerColor, otherPlayerColors);
+        this.curState = State.INITIALIZED;
     }
 
-    public Token getToken(){
-        return token;
-    }
-
-    public Tile getTile(int i){
-        if (0 <= i && i < 3) {
-            if (i > hand.size() - 1)
-                return null;
-
-            return hand.get(i);
-        }
-        else
-            throw new IndexOutOfBoundsException("Illegal Hand Access");
-    }
-
-    //================================================================================
-    // Public methods
-    //================================================================================
-    public void placeToken() {
+    public void placeToken(Board board) {
         if (curState != State.INITIALIZED)
             throw new ContractException();
 
-        Pair<BoardSpace, Integer> startingTokenLocation = getStartingLocation();
+        Pair<BoardSpace, Integer> startingTokenLocation = aplayer.placePawn(board);
         token = new Token(startingTokenLocation.getKey(), startingTokenLocation.getValue(), this);
         curState = State.TURNPLAYABLE;
     }
@@ -97,28 +62,40 @@ public abstract class APlayer {
         curState = State.TURNPLAYABLE;
     }
 
-
-    public void initialize(List<Token> otherPlayers){
-        if (curState != State.UNINITIALIZED)
-            throw new ContractException();
-
-        this.otherPlayers = new ArrayList<>(otherPlayers);
-        this.curState = State.INITIALIZED;
-    }
-
-    public void endGame(){
-        if (curState != State.TURNPLAYABLE)
-            throw new ContractException();
-        // Do something?
-
-        curState = State.GAMEENDED;
-    }
-
-    public Tile chooseTile(){
+    public Tile chooseTile(Board board){
         if (curState != State.TURNPLAYABLE || !isValidHand())
             throw new ContractException();
 
-        return chooseTileHelper();
+        return aplayer.playTurn(board, hand, tilePile.size());
+    }
+
+    public void endGame(Board board, List<Color> winningColors){
+        if (curState != State.TURNPLAYABLE)
+            throw new ContractException();
+
+        aplayer.endGame(board, winningColors);
+        curState = State.GAMEENDED;
+    }
+
+
+    public Token getToken(){
+        return token;
+    }
+
+    public Color getColor(){
+        return aplayer.getColor();
+    }
+
+
+    public Tile getTile(int i){
+        if (0 <= i && i < 3) {
+            if (i > hand.size() - 1)
+                return null;
+
+            return hand.get(i);
+        }
+        else
+            throw new IndexOutOfBoundsException("Illegal Hand Access");
     }
 
     public boolean holdsTile(Tile tile){
@@ -209,6 +186,14 @@ public abstract class APlayer {
         return true;
     }
 
+    public void replaceWithRandom(){
+        Color color = aplayer.getColor();
+        List<Color> otherPlayers = aplayer.getOtherPlayers();
+        aplayer = new RandomPlayer(aplayer.getName());
+        aplayer.initialize(color, otherPlayers);
+    }
+
+
     //================================================================================
     // Private methods
     //================================================================================
@@ -218,16 +203,9 @@ public abstract class APlayer {
     }
 
     //================================================================================
-    // Abstract methods
-    //================================================================================
-    abstract public Pair<BoardSpace, Integer> getStartingLocation();
-
-    // TODO: Think of a better name for this method
-    abstract protected Tile chooseTileHelper();
-
-
-    //================================================================================
     // Sequential Contract
     //================================================================================
     private enum State {UNINITIALIZED, INITIALIZED, TURNPLAYABLE, GAMEENDED};
+
+
 }

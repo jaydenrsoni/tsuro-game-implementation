@@ -1,8 +1,6 @@
-package main.Players;
+package main;
 
-import main.Color;
-import main.Tile;
-
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -10,13 +8,13 @@ import java.util.Set;
  */
 public abstract class ScorePlayer extends APlayer {
 
-    public ScorePlayer(String name, Color color){
-        super(name, color);
+    public ScorePlayer(String name){
+        super(name);
     }
 
     @Override
-    protected Tile chooseTileHelper(){
-        Set<Tile> legalMoves = getLegalMoves();
+    public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft){
+        List<Tile> legalMoves = board.findLegalMovesForPlayer(hand, getColor());
         Tile bestTile = null;
         int bestScore = Integer.MIN_VALUE;
 

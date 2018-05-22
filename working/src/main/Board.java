@@ -1,7 +1,6 @@
 package main;
 
 import javafx.util.Pair;
-import main.Players.APlayer;
 
 import java.util.*;
 
@@ -53,14 +52,98 @@ public class Board {
 
     // Returns true if placing the tile in front of the token will lead to the player's death
     // Does not actually place the tile
-    public boolean willKillPlayer(Tile tile, APlayer player) {
-        Token token = player.getToken();
+    public boolean willKillPlayer(Tile tile, SPlayer splayer) {
+        Token token = splayer.getToken();
         BoardSpace curSpace = token.getBoardSpace();
         int curTokenSpace = token.getTokenSpace();
 
-       /* int nextTokenSpace = token.findNextTokenSpace();
-        BoardSpace nextSpace = getNextSpace(token);*/
+        return willKillPlayerFromLocation(tile, curSpace, curTokenSpace);
+    }
 
+    // Places the tile in front of the splayer, regardless of whether it will kill the splayer
+    //   Returns the Set of tokens driven off the board
+    public Set<Token> placeTile(Tile tile, SPlayer splayer) {
+
+        // Place the tile on the space
+        BoardSpace space = splayer.getToken().getBoardSpace();
+        space.setTile(tile);
+
+        // Gather every token currently on the space
+        Set<Token> tokensToMove = space.getTokensOnSpace();
+        Set<Token> eliminatedPlayers = new HashSet<>();
+
+        // Advance each token to the end of their path
+        for (Token token: tokensToMove){
+            advanceToEnd(token);
+
+            // Eliminate the token if necessary
+            if (isOnEdge(token)) {
+                eliminatedPlayers.add(token);
+                token.removeFromBoard();
+            }
+        }
+
+        return eliminatedPlayers;
+    }
+
+    public boolean hasSafeMove(List<Tile> hand, BoardSpace boardSpace, int tokenSpace){
+        for (Tile tile: hand){
+            Tile copy = new Tile(tile);
+            for (int i = 0; i < 4; i++){
+                copy.rotateClockwise();
+                if (!willKillPlayerFromLocation(copy, boardSpace, tokenSpace))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Tile> findLegalMovesForPlayer(List<Tile> hand, Color color){
+        List<Tile> legalMoves = new ArrayList<>();
+        Pair<BoardSpace, Integer> location = findLocationFromColor(color);
+        boolean hasSafeMoves = hasSafeMove(hand, location.getKey(), location.getValue());
+
+        for (Tile tile: hand){
+            for (int rotation = 0; rotation < 4; rotation++){
+                if (!hasSafeMoves || !willKillPlayerFromLocation(tile, location.getKey(), location.getValue()))
+                    legalMoves.add(new Tile (tile));
+                tile.rotateClockwise();
+            }
+        }
+
+        return legalMoves;
+    }
+
+
+    public BoardSpace findLocationOfTile(Tile tile){
+        for (int row = 0; row < BOARD_LENGTH; row++) {
+            for (int col = 0; col < BOARD_LENGTH; col++) {
+                BoardSpace space = getBoardSpace(row, col);
+                if (space.hasTile() && space.getTile().equals(tile))
+                    return space;
+            }
+        }
+
+        return null;
+    }
+
+    //================================================================================
+    // Private Helpers
+    //================================================================================
+    private Pair<BoardSpace, Integer> findLocationFromColor(Color color){
+        for (int row = 0; row < BOARD_LENGTH; row++){
+            for (int col = 0; col < BOARD_LENGTH; col++){
+                BoardSpace boardSpace = getBoardSpace(row, col);
+                int tokenSpace = boardSpace.findColor(color);
+                if (tokenSpace != -1){
+                    return new Pair<BoardSpace, Integer>(boardSpace, tokenSpace);
+                }
+            }
+        }
+        return new Pair<BoardSpace, Integer>(null, null);
+    }
+
+    private boolean willKillPlayerFromLocation(Tile tile, BoardSpace curSpace, int curTokenSpace){
         try {
             // Move to the space across the tile
             curTokenSpace = tile.findMatch(curTokenSpace);
@@ -83,48 +166,6 @@ public class Board {
             return true;
         }
     }
-
-    // Places the tile in front of the player, regardless of whether it will kill the player
-    //   Returns the Set of tokens driven off the board
-    public Set<Token> placeTile(Tile tile, APlayer player) {
-
-        // Place the tile on the space
-        BoardSpace space = player.getToken().getBoardSpace();
-        space.setTile(tile);
-
-        // Gather every token currently on the space
-        Set<Token> tokensToMove = space.getTokensOnSpace();
-        Set<Token> eliminatedPlayers = new HashSet<>();
-
-        // Advance each token to the end of their path
-        for (Token token: tokensToMove){
-            advanceToEnd(token);
-
-            // Eliminate the token if necessary
-            if (isOnEdge(token)) {
-                eliminatedPlayers.add(token);
-                token.removeFromBoard();
-            }
-        }
-
-        return eliminatedPlayers;
-    }
-
-    public BoardSpace findLocationOfTile(Tile tile){
-        for (int row = 0; row < BOARD_LENGTH; row++) {
-            for (int col = 0; col < BOARD_LENGTH; col++) {
-                BoardSpace space = getBoardSpace(row, col);
-                if (space.hasTile() && space.getTile().equals(tile))
-                    return space;
-            }
-        }
-
-        return null;
-    }
-
-    //================================================================================
-    // Private Helpers
-    //================================================================================
 
     // Gets the adjacent space of an arbitrary board space and token space.
     private BoardSpace getNextSpace(BoardSpace boardSpace, int tokenSpace) {

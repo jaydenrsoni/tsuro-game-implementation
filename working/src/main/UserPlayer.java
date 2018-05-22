@@ -1,18 +1,13 @@
-package main.Players;
+package main;
 
 import javafx.util.Pair;
-import main.BoardSpace;
-import main.Color;
-import main.Game;
-import main.Tile;
 
-import java.lang.reflect.Array;
 import java.util.Scanner;
 
 /**
  * Created by vyasalwar on 5/3/18.
  */
-public class UserPlayer extends APlayer{
+public class UserPlayer extends APlayer {
 
     public UserPlayer(String name, Color color) {
         super(name, color);

@@ -96,6 +96,16 @@ public class BoardSpace {
         return tokenSpaces.getOrDefault(token, -1);
     }
 
+    public int findColor(Color color){
+        for (Token token : tokenSpaces.keySet()){
+            if(token.getPlayer().getColor() == color){
+                return tokenSpaces.get(token);
+            }
+        }
+
+        return -1;
+    }
+
     public int removeToken(Token token){
         return tokenSpaces.remove(token);
     }

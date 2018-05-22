@@ -1,56 +1,64 @@
-package main.Players;
+package main;
 
-//import apple.laf.JRSUIConstants;
 import javafx.util.Pair;
-import main.*;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
-public class RandomPlayer extends APlayer {
+public abstract class APlayer {
 
     //================================================================================
-    // Instance variables
+    // Instance Variables
     //================================================================================
-    private Random random;
+
+    private String name;
+    private Color color;
+    private List<Color> otherPlayers;
+
 
     //================================================================================
     // Constructor
     //================================================================================
-    public RandomPlayer(String name, Color color){
-        super(name, color);
-        random = new Random();
+    public APlayer(String name){
+        this.name = name;
     }
-
-    public RandomPlayer(APlayer other){
-        super(other);
-    }
-
-    //For testing
-    public RandomPlayer(String name, Color color, int seed){
-        super(name, color);
-        random = new Random(seed);
-    }
-
-
 
     //================================================================================
-    // Override methods
+    // Getters
     //================================================================================
-    public Pair<BoardSpace, Integer> getStartingLocation(){
-        return getRandomStartingLocation(random);
+    public Color getColor() {
+        return color;
     }
 
-    protected Tile chooseTileHelper() {
-        Set<Tile> legalMoves =  getLegalMoves();
-        Tile[] legalMovesArr = legalMoves.toArray(new Tile[legalMoves.size()]);
-        int randomIndex = random.nextInt(legalMovesArr.length);
-        return legalMovesArr[randomIndex];
+    public List<Color> getOtherPlayers() {
+        return otherPlayers;
     }
 
+    public String getName(){
+        return name;
+    }
+
+    //================================================================================
+    // Public methods
+    //================================================================================
+    public void initialize(Color playerColor, List<Color> otherPlayerColors){
+        this.color = playerColor;
+        this.otherPlayers = new ArrayList<>(otherPlayerColors);
+    }
+
+    public Pair<BoardSpace, Integer> placePawn(Board board) {
+        return getStartingLocation();
+    }
+
+    abstract public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft);
+
+    public void endGame(Board board, List<Color> winningColors){
+        // Do something?
+    }
+
+    //================================================================================
+    // Abstract methods
+    //================================================================================
+    abstract public Pair<BoardSpace, Integer> getStartingLocation();
 
     //================================================================================
     // Public Static Methods
@@ -77,7 +85,7 @@ public class RandomPlayer extends APlayer {
         else{
             return new Pair<>(board.getBoardSpace(indexOfEdge, 0), tokenSpace);
         }
-
-
     }
+
+
 }

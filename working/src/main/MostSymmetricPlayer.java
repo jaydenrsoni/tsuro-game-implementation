@@ -1,7 +1,6 @@
-package main.Players;
+package main;
 
 import javafx.util.Pair;
-import main.*;
 
 import java.util.Random;
 
@@ -9,13 +8,13 @@ import java.util.Random;
  * Created by vyasalwar on 4/30/18.
  */
 public class MostSymmetricPlayer extends ScorePlayer {
-    public MostSymmetricPlayer(String name, Color color) {
-        super(name, color);
+    public MostSymmetricPlayer(String name) {
+        super(name);
     }
 
     // Get random starting location
     public Pair<BoardSpace, Integer> getStartingLocation() {
-        return RandomPlayer.getRandomStartingLocation(new Random());
+        return getRandomStartingLocation(new Random());
     }
 
     // Order tiles from least to most symmetric, and choose the first legal rotation among them

@@ -1,10 +1,6 @@
 package main;
 
 import javafx.util.Pair;
-import main.Players.APlayer;
-import main.Players.LeastSymmetricPlayer;
-import main.Players.MostSymmetricPlayer;
-import main.Players.RandomPlayer;
 
 import java.util.*;
 
@@ -37,10 +33,10 @@ public class Game {
     // Instance Variables
     //================================================================================
     private Board board;
-    private List<APlayer> remainingPlayers;
-    private List<APlayer> eliminatedPlayers;
+    private List<SPlayer> remainingPlayers;
+    private List<SPlayer> eliminatedPlayers;
     private TilePile tilePile;
-    private APlayer dragonTileOwner;
+    private SPlayer dragonTileOwner;
 
     //================================================================================
     // Getters
@@ -65,76 +61,77 @@ public class Game {
     //================================================================================
 
     // Adds a player to a new game
-    public void registerPlayer(String name, Color color, PlayerType type){
+    public void registerPlayer(String name, PlayerType type){
         APlayer aplayer;
         switch(type) {
             case RANDOM:
-                aplayer = new RandomPlayer(name, color);
+                aplayer = new RandomPlayer(name);
                 break;
             case MOSTSYMMETRIC:
-                aplayer = new MostSymmetricPlayer(name, color);
+                aplayer = new MostSymmetricPlayer(name);
                 break;
             case LEASTSYMMETRIC:
-                aplayer = new LeastSymmetricPlayer(name, color);
+                aplayer = new LeastSymmetricPlayer(name);
                 break;
             default:
                 throw new IllegalArgumentException("player type given was not valid");
         }
 
-        remainingPlayers.add(aplayer);
+        remainingPlayers.add(new SPlayer(aplayer, tilePile));
     }
 
 
     // For testing purposes only
     // TODO: Remove in production
-    public void registerPlayer(APlayer player){
-        remainingPlayers.add(player);
+    public void registerPlayer(APlayer aplayer){
+        SPlayer newPlayer = new SPlayer(aplayer, tilePile);
+        remainingPlayers.add(newPlayer);
     }
 
     // Determine whether a player has the ability to play the move.
-    public boolean isLegalMove(Tile tile, APlayer player){
-        if(!player.holdsTile(tile))
+    public boolean isLegalMove(Tile tile, SPlayer splayer){
+        if(!splayer.holdsTile(tile))
             return false;
 
-        if(player.hasSafeMove() && board.willKillPlayer(tile, player))
+        if(splayer.hasSafeMove() && board.willKillPlayer(tile, splayer))
             return false;
 
         return true;
     }
 
     // Let a player with an empty hand request the TilePile
-    public void requestDragonTile(APlayer player){
+    public void requestDragonTile(SPlayer splayer){
         if (dragonTileOwner == null && tilePile.isEmpty()) {
-            dragonTileOwner = player;
+            dragonTileOwner = splayer;
         }
     }
 
     /* TODO: MAKE PRIVATE WHEN NOT DEBUGGING */
     // Deal with when the player place the tile on the board
     //   Returns a set of players who have lost after the tile is placed
-    public Set<APlayer> playTurn(Tile tile, APlayer player) throws ContractException{
-            if (!isLegalMove(tile, player)) {
+    public Set<SPlayer> playTurn(Tile tile, SPlayer splayer) throws ContractException{
+            if (!isLegalMove(tile, splayer)) {
                 throw new ContractException("Player made an illegal move");
             }
 
-            Set<Token> failedTokens = board.placeTile(tile, player);
-            Set<APlayer> failedPlayers = new HashSet<>();
+            Set<Token> failedTokens = board.placeTile(tile, splayer);
+            Set<SPlayer> failedPlayers = new HashSet<>();
             for (Token failedToken : failedTokens)
                 failedPlayers.add(failedToken.getPlayer());
 
             if (failedPlayers.containsAll(remainingPlayers))
                 return failedPlayers;
 
-            player.removeTileFromHand(tile);
-            player.drawFromPile();
+            splayer.removeTileFromHand(tile);
+            splayer.drawFromPile();
 
             if (!failedPlayers.isEmpty()) {
-                for (APlayer failedPlayer : failedPlayers)
+                for (SPlayer failedPlayer : failedPlayers)
                     failedPlayer.returnTilesToPile();
 
-                APlayer playerToDrawFirst = findPlayerToDrawFirst(failedPlayers, player);
+                SPlayer playerToDrawFirst = findPlayerToDrawFirst(failedPlayers, splayer);
 
-                for (APlayer failedPlayer : failedPlayers)
+                for (SPlayer failedPlayer : failedPlayers)
                     eliminatePlayer(failedPlayer);
 
 
@@ -145,22 +142,25 @@ public class Game {
     }
 
     public void initializePlayers(){
-        List<Token> startingTokenList = new ArrayList<>();
-        for(APlayer player : remainingPlayers){
-            startingTokenList.add(player.getToken());
+        List<Color> startingColorList = new ArrayList<>();
+        Color[] colors = Color.values();
+
+        for(int i = 0; i < remainingPlayers.size(); i++){
+            startingColorList.add(colors[i]);
         }
-        for(APlayer player : remainingPlayers){
-            player.initialize(startingTokenList);
+
+        for(int i = 0; i < remainingPlayers.size(); i++){
+            remainingPlayers.get(i).initialize(startingColorList.get(i), startingColorList);
         }
     }
 
 
     // Main game loop
-    public Set<APlayer> playGame(){
+    public List<Color> playGame(){
         initializePlayers();
 
-        for (APlayer player: remainingPlayers) {
-            player.placeToken();
+        for (SPlayer splayer: remainingPlayers) {
+            splayer.placeToken(board);
         }
 
         /*
@@ -168,11 +168,12 @@ public class Game {
          */
 
 //        int i = 0;
+        //is blaming system good?
         while (true) {
-            APlayer player = remainingPlayers.get(0);
-            Tile tile = player.chooseTile();
+            SPlayer splayer = remainingPlayers.get(0);
+            Tile tile = splayer.chooseTile(board);
             try {
-                Set<APlayer> losingPlayers = playTurn(tile, player);
+                Set<SPlayer> losingPlayers = playTurn(tile, splayer);
                 if(losingPlayers.containsAll(remainingPlayers) || remainingPlayers.size() <= 1){
                     break;
                 }
@@ -181,29 +182,32 @@ public class Game {
                 }
             }
             catch (ContractException e) {
-                remainingPlayers.remove(player);
-                player = blamePlayer(player);
-                remainingPlayers.add(0, player);
+                blamePlayer(splayer);
                 continue;
             }
 
-            if(!eliminatedPlayers.contains(player)){
-                remainingPlayers.remove(player);
-                remainingPlayers.add(player);
+            if(!eliminatedPlayers.contains(splayer)){
+                remainingPlayers.remove(splayer);
+                remainingPlayers.add(splayer);
             }
 
-//            if (remainingPlayers.get(i).equals(player))
+//            if (remainingPlayers.get(i).equals(splayer))
 //                i = (i + 1) % remainingPlayers.size();
         }
 
-        for (APlayer player : remainingPlayers){
-            player.endGame();
-        }
-        for (APlayer player : eliminatedPlayers){
-            player.endGame();
+        List<Color> winningColors = new ArrayList<>();
+        for (SPlayer splayer : remainingPlayers) {
+            winningColors.add(splayer.getColor());
         }
 
-        return new HashSet<>(remainingPlayers);
+        for (SPlayer splayer : remainingPlayers) {
+            splayer.endGame(board, winningColors);
+        }
+        for (SPlayer splayer : eliminatedPlayers) {
+            splayer.endGame(board, winningColors);
+        }
+
+        return winningColors;
     }
 
 
@@ -220,16 +224,16 @@ public class Game {
 
     // Checks to see if all players still in the game have full hands
     private boolean areAllRemainingHandsFull() {
-       for(APlayer player : remainingPlayers){
-           if (!player.hasFullHand())
+       for(SPlayer splayer : remainingPlayers){
+           if (!splayer.hasFullHand())
                return false;
        }
        return true;
     }
 
     private boolean areAllRemainingHandsEmpty() {
-        for(APlayer player : remainingPlayers){
-            if (!player.hasEmptyHand())
+        for(SPlayer splayer : remainingPlayers){
+            if (!splayer.hasEmptyHand())
                 return false;
         }
         return true;
@@ -237,7 +241,7 @@ public class Game {
 
     // After a player has been eliminated, go around in a clockwise direction and have
     //   all players draw tiles if necessary
-    private void drawAfterElimination(APlayer playerToDrawFirst){
+    private void drawAfterElimination(SPlayer playerToDrawFirst){
         int playerToDrawIndex = remainingPlayers.indexOf(playerToDrawFirst);
         while(!tilePile.isEmpty() && !areAllRemainingHandsFull()){
             remainingPlayers.get(playerToDrawIndex).drawFromPile();
@@ -247,7 +251,7 @@ public class Game {
     }
 
     // Determine which player should draw first after a player has been eliminated
-    private APlayer findPlayerToDrawFirst(Set<APlayer> failedPlayers, APlayer currentPlayer){
+    private SPlayer findPlayerToDrawFirst(Set<SPlayer> failedPlayers, SPlayer currentPlayer){
         if (dragonTileOwner != null && !failedPlayers.contains(dragonTileOwner)){
             return dragonTileOwner;
         }
@@ -261,7 +265,7 @@ public class Game {
     }
 
     // Eliminates a player. To be called when a player token is forced off the edge
-    private void eliminatePlayer(APlayer eliminatedPlayer){
+    private void eliminatePlayer(SPlayer eliminatedPlayer){
         if (dragonTileOwner == eliminatedPlayer){
             resetDragonTile();
         }
@@ -270,8 +274,8 @@ public class Game {
         eliminatedPlayers.add(eliminatedPlayer);
     }
 
-    private APlayer blamePlayer(APlayer splayer){
-        return new RandomPlayer(splayer);
+    private void blamePlayer(SPlayer splayer){
+        splayer.replaceWithRandom();
     }
 
 
@@ -284,13 +288,13 @@ public class Game {
         EXPERIMENTAL
      */
     public static void main(String[] args){
-        Game game = getGame();
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to Tsuro!");
-
-        for (String player: args) {
-            game.registerPlayer(player, Color.BLACK, PlayerType.RANDOM);
-        }
-        game.playGame();
+//        Game game = getGame();
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.println("Welcome to Tsuro!");
+//
+//        for (String player: args) {
+//            game.registerPlayer(player, Color.BLACK, PlayerType.RANDOM);
+//        }
+//        game.playGame();
     }
 }
