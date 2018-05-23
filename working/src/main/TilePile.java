@@ -1,5 +1,10 @@
 package main;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -23,6 +28,15 @@ public class TilePile {
     public TilePile(String filename){
         tiles = new LinkedList<>();
         fillTiles(filename);
+    }
+
+    public TilePile(Node tilePileElement){
+        tiles = new LinkedList<>();
+
+        NodeList tileList = tilePileElement.getChildNodes();
+        for (int i = 0; i < tileList.getLength(); i++) {
+            tiles.add(new Tile(tileList.item(i)));
+        }
     }
 
     //=====b===========================================================================

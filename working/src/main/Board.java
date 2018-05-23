@@ -3,6 +3,8 @@ package main;
 import javafx.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.*;
@@ -25,6 +27,27 @@ public class Board {
             for (int j = 0; j < BOARD_LENGTH; j++) {
                 spaces[i][j] = new BoardSpace(i, j);
             }
+        }
+    }
+
+    public Board(Node boardNode) {
+        this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
+        for (int i = 0; i < BOARD_LENGTH; i++) {
+            for (int j = 0; j < BOARD_LENGTH; j++) {
+                spaces[i][j] = new BoardSpace(i, j);
+            }
+        }
+
+        NodeList boardNodeChildren = boardNode.getChildNodes();
+        NodeList tileNodes = boardNodeChildren.item(0).getChildNodes();
+        NodeList pawnNodes = boardNodeChildren.item(1).getChildNodes();
+
+        for (int i = 0; i < tileNodes.getLength(); i++) {
+            addTileToBoard(tileNodes.item(i));
+        }
+
+        for (int i = 0; i < pawnNodes.getLength(); i++) {
+            //TODO: decode locations and loop through Board Spaces
         }
     }
 
@@ -253,6 +276,20 @@ public class Board {
         return isOnEdge(row, col, tokenSpace);
     }
 
+    private void addTileToBoard(Node tilesEntryNode) {
+        NodeList tilesEntryNodeChildren = tilesEntryNode.getChildNodes();
+        BoardSpace boardSpace = boardSpaceFromXYNode(tilesEntryNodeChildren.item(0));
+        Tile tile = new Tile(tilesEntryNodeChildren.item(1));
+        boardSpace.setTile(tile);
+    }
+
+    private BoardSpace boardSpaceFromXYNode(Node XYNode) {
+        NodeList XYNodeChildren = XYNode.getChildNodes();
+        int row = Integer.parseInt(XYNodeChildren.item(1).getTextContent());
+        int col = Integer.parseInt(XYNodeChildren.item(0).getTextContent());
+        return getBoardSpace(row, col);
+    }
+
     private Element encodeTiles(Document doc) {
         Element tilesElement = doc.createElement("map");
 
@@ -264,7 +301,7 @@ public class Board {
                 BoardSpace boardSpace = getBoardSpace(row, col);
                 if (boardSpace.hasTile()) {
                     Element entElement = doc.createElement("ent");
-                    Element xyNode = encodeXY(doc, row, col);
+                    Element xyNode = encodeXY(doc, col, row);
                     Element tileNode = boardSpace.getTile().encodeTile(doc);
 
                     entElement.appendChild(xyNode);

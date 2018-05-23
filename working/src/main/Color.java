@@ -2,6 +2,7 @@ package main;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 /**
@@ -22,5 +23,9 @@ public enum Color {
         Text colorText = doc.createTextNode(this.name().toLowerCase());
         colorElement.appendChild(colorText);
         return colorElement;
+    }
+
+    public static Color decodeColor(Node colorNode) {
+        return Color.valueOf(colorNode.getTextContent().toUpperCase());
     }
 }

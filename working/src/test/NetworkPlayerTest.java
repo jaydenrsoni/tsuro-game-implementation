@@ -1,6 +1,5 @@
 package test;
 
-import jdk.nashorn.api.tree.NewTree;
 import main.*;
 import org.junit.Assert;
 import org.junit.Before;

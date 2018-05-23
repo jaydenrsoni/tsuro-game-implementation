@@ -1,6 +1,8 @@
 package main;
 
 import javafx.util.Pair;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +31,26 @@ public class SPlayer {
         for(int i = 0; i < MAX_TILES_IN_BANK; i++){
             drawFromPile();
         }
+    }
+
+    public SPlayer(Node splayerNode, TilePile tilePile){
+        if (splayerNode.getNodeName().equals("splayer-dragon")) {
+            requestDragonTile();
+        }
+        NodeList splayerNodeChildren = splayerNode.getChildNodes();
+        this.color = Color.decodeColor(splayerNodeChildren.item(0));
+
+        this.hand = new ArrayList<>();
+        Node handNode = splayerNodeChildren.item(1);
+        NodeList tileNodes = handNode.getChildNodes();
+        for (int i = 0; i < tileNodes.getLength(); i++) {
+            this.hand.add(new Tile(tileNodes.item(i)));
+        }
+        this.tilePile = tilePile;
+        this.iplayer = null;
+        this.curState = State.GAMEENDED;
+        this.token = null;
+
     }
 
     //================================================================================

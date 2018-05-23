@@ -2,6 +2,8 @@ package main;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.HashSet;
@@ -68,6 +70,16 @@ public class Tile {
             connections.add(new TileConnection(tileConnection));
         }
     }
+
+    public Tile(Node tileNode){
+        connections = new HashSet<>();
+
+        NodeList connectionList = tileNode.getChildNodes();
+        for (int i = 0; i < connectionList.getLength(); i++) {
+            connections.add(new TileConnection(connectionList.item(i)));
+        }
+    }
+
 
     //================================================================================
     // Public methods
@@ -193,6 +205,14 @@ public class Tile {
         public TileConnection (TileConnection other) {
             this.endpointA = other.endpointA;
             this.endpointB = other.endpointB;
+        }
+
+        public TileConnection (Node tileConnectionNode) {
+
+            NodeList endpointPair = tileConnectionNode.getChildNodes();
+            this.endpointA = Integer.parseInt(endpointPair.item(0).getTextContent());
+            this.endpointB = Integer.parseInt(endpointPair.item(1).getTextContent());
+
         }
 
         // Returns true if the argument is one of the endpoints

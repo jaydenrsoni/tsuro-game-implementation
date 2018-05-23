@@ -53,6 +53,17 @@ public class NetworkPlayer implements IPlayer {
 
     }
 
+    public NetworkPlayer() {
+        docFactory = DocumentBuilderFactory.newInstance();
+        try {
+            docBuilder = docFactory.newDocumentBuilder();
+        }
+        catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     public String getName() {
         Document message = docBuilder.newDocument();
