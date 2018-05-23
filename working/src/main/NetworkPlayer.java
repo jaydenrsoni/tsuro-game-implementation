@@ -14,7 +14,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +26,11 @@ public class NetworkPlayer implements IPlayer {
     private DocumentBuilderFactory docFactory;
     private DocumentBuilder docBuilder;
 
-    public NetworkPlayer() {
+    private Socket socket;
+    private PrintWriter output;
+    private BufferedReader input;
+
+    public NetworkPlayer(String hostName, int port) {
         docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
@@ -32,6 +38,19 @@ public class NetworkPlayer implements IPlayer {
         catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
+
+        try {
+            Socket socket = new Socket(hostName, port);
+            output = new PrintWriter(socket.getOutputStream(), true);
+            input = new BufferedReader( new InputStreamReader(socket.getInputStream()));
+        }
+        catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -43,9 +62,9 @@ public class NetworkPlayer implements IPlayer {
         nameTag.appendChild(empty);
         message.appendChild(nameTag);
 
-        transformText(message);
-
-        //decode here
+        sendMessage(message);
+        String response = readMessage();
+        
         return "";
     }
 
@@ -62,7 +81,8 @@ public class NetworkPlayer implements IPlayer {
 
         message.appendChild(nameTag);
 
-        transformText(message);
+        sendMessage(message);
+        String response = readMessage();
     }
 
     @Override
@@ -75,7 +95,8 @@ public class NetworkPlayer implements IPlayer {
         nameTag.appendChild(boardNode);
         message.appendChild(nameTag);
 
-        transformText(message);
+        sendMessage(message);
+        String response = readMessage();
 
         return null;
     }
@@ -97,7 +118,8 @@ public class NetworkPlayer implements IPlayer {
         nameTag.appendChild(nNode);
         message.appendChild(nameTag);
 
-        transformText(message);
+        sendMessage(message);
+        String response = readMessage();
 
         return null;
     }
@@ -114,7 +136,8 @@ public class NetworkPlayer implements IPlayer {
         nameTag.appendChild(setOfColorNode);
         message.appendChild(nameTag);
 
-        transformText(message);
+        sendMessage(message);
+        String response = readMessage();
     }
 
     private Element encodeListOfColors(Document doc, List<Color> list) {
@@ -147,18 +170,29 @@ public class NetworkPlayer implements IPlayer {
         return tileSetElement;
     }
 
-    private void transformText(Document doc) {
-        DOMSource source = new DOMSource(doc);
+    private void sendMessage(Document message) {
+        DOMSource source = new DOMSource(message);
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(source, result);
-        } catch (TransformerException e) {
+        }
+        catch (TransformerException e) {
             e.printStackTrace();
         }
 
-        System.out.println("XML String: " + writer.toString());
+        output.println(writer.toString());
+    }
+
+    private String readMessage(){
+        try {
+            return input.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 }
