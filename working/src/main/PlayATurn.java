@@ -9,9 +9,16 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,23 +76,19 @@ public class PlayATurn {
 
         doc = docBuilder.newDocument();
         doc.appendChild(game.getTilePile().encodeTilePile(doc));
-        System.out.println(doc.toString());
+        printdoc(doc);
 
         doc = docBuilder.newDocument();
         doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
-        System.out.println(doc.toString());
+        printdoc(doc);
 
         doc = docBuilder.newDocument();
         doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getEliminatedPlayers()));
-        System.out.println(doc.toString());
-
-        doc = docBuilder.newDocument();
-        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
-        System.out.println(doc.toString());
+        printdoc(doc);
 
         doc = docBuilder.newDocument();
         doc.appendChild(game.getBoard().encodeBoard(doc));
-        System.out.println(doc.toString());
+        printdoc(doc);
 
         doc = docBuilder.newDocument();
         if(game.isGameOverWithLoss(losingPlayers)){
@@ -94,8 +97,22 @@ public class PlayATurn {
         else {
             NetworkAdapter.encodeFalse(doc);
         }
-        System.out.println(doc.toString());
+        printdoc(doc);
     }
 
+    public static void printdoc(Document doc) {
+        DOMSource source = new DOMSource(doc);
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.transform(source, result);
+        }
+        catch (TransformerException e) {
+            e.printStackTrace();
+        }
+        System.out.println(writer.toString());
+    }
 
 }

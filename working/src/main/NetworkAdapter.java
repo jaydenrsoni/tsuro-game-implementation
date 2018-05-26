@@ -16,6 +16,8 @@ public class NetworkAdapter {
 
     public static Element encodeListOfColors(Document doc, List<Color> list) {
         Element colorListElement = doc.createElement("list");
+        Text spaceText = doc.createTextNode(" ");
+        colorListElement.appendChild(spaceText);
 
         for(Color color : list) {
             colorListElement.appendChild(color.encodeColor(doc));
@@ -26,6 +28,8 @@ public class NetworkAdapter {
 
     public static Element encodeSetOfColors(Document doc, Set<Color> set) {
         Element colorSetElement = doc.createElement("set");
+        Text spaceText = doc.createTextNode(" ");
+        colorSetElement.appendChild(spaceText);
 
         for(Color color : set) {
             colorSetElement.appendChild(color.encodeColor(doc));
@@ -36,6 +40,8 @@ public class NetworkAdapter {
 
     public static Element encodeListOfTiles(Document doc, List<Tile> list) {
         Element tileSetElement = doc.createElement("list");
+        Text spaceText = doc.createTextNode(" ");
+        tileSetElement.appendChild(spaceText);
 
         for(Tile tile : list) {
             tileSetElement.appendChild(tile.encodeTile(doc));
@@ -46,6 +52,8 @@ public class NetworkAdapter {
 
     public static Element encodeSetOfTiles(Document doc, Set<Tile> set) {
         Element tileSetElement = doc.createElement("set");
+        Text spaceText = doc.createTextNode(" ");
+        tileSetElement.appendChild(spaceText);
 
         for(Tile tile : set) {
             tileSetElement.appendChild(tile.encodeTile(doc));
@@ -56,6 +64,8 @@ public class NetworkAdapter {
 
     public static Element encodeListOfSPlayers(Document doc, List<SPlayer> list){
         Element splayerListElement = doc.createElement("list");
+        Text spaceText = doc.createTextNode(" ");
+        splayerListElement.appendChild(spaceText);
 
         for(SPlayer splayer : list) {
             splayerListElement.appendChild(splayer.encodeSPlayer(doc));
