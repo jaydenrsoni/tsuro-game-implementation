@@ -85,7 +85,7 @@ public class NetworkPlayer implements IPlayer {
 
         Element nameTag = message.createElement("initialize");
         Element colorNode = playerColor.encodeColor(message);
-        Element listOfColorsNode = this.encodeListOfColors(message, otherPlayerColors);
+        Element listOfColorsNode = NetworkAdapter.encodeListOfColors(message, otherPlayerColors);
 
         nameTag.appendChild(colorNode);
         nameTag.appendChild(listOfColorsNode);
@@ -118,7 +118,7 @@ public class NetworkPlayer implements IPlayer {
 
         Element nameTag = message.createElement("play-turn");
         Element boardNode = board.encodeBoard(message);
-        Element setOfTileNode = encodeSetOfTiles(message, new HashSet<>(hand));
+        Element setOfTileNode = NetworkAdapter.encodeSetOfTiles(message, new HashSet<>(hand));
 
         Element nNode = message.createElement("n");
         Text nText = message.createTextNode(String.valueOf(numberTilesLeft));
@@ -141,7 +141,7 @@ public class NetworkPlayer implements IPlayer {
 
         Element nameTag = message.createElement("play-turn");
         Element boardNode = board.encodeBoard(message);
-        Element setOfColorNode = encodeSetOfColors(message, winningColors);
+        Element setOfColorNode = NetworkAdapter.encodeSetOfColors(message, winningColors);
 
         nameTag.appendChild(boardNode);
         nameTag.appendChild(setOfColorNode);
@@ -149,36 +149,6 @@ public class NetworkPlayer implements IPlayer {
 
         sendMessage(message);
         String response = readMessage();
-    }
-
-    private Element encodeListOfColors(Document doc, List<Color> list) {
-        Element colorListElement = doc.createElement("list");
-
-        for(Color color : list) {
-            colorListElement.appendChild(color.encodeColor(doc));
-        }
-
-        return colorListElement;
-    }
-
-    private Element encodeSetOfColors(Document doc, Set<Color> set) {
-        Element colorSetElement = doc.createElement("set");
-
-        for(Color color : set) {
-            colorSetElement.appendChild(color.encodeColor(doc));
-        }
-
-        return colorSetElement;
-    }
-
-    private Element encodeSetOfTiles(Document doc, Set<Tile> set) {
-        Element tileSetElement = doc.createElement("set");
-
-        for(Tile tile : set) {
-            tileSetElement.appendChild(tile.encodeTile(doc));
-        }
-
-        return tileSetElement;
     }
 
     private void sendMessage(Document message) {

@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class PlayATurn {
 
@@ -33,6 +34,8 @@ public class PlayATurn {
             e.printStackTrace();
         }
 
+        Game game = Game.getGame();
+
         InputStream is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
         Document doc = docBuilder.parse(is);
         Node tileListNode = doc.getChildNodes().item(0);
@@ -41,17 +44,17 @@ public class PlayATurn {
         is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
         doc = docBuilder.parse(is);
         Node remPlayerListNode = doc.getChildNodes().item(0);
-        List<SPlayer> remPlayers = decodeSPlayerList(remPlayerListNode, tilePile);
+        List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayer(remPlayerListNode, tilePile);
 
         is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
         doc = docBuilder.parse(is);
         Node elimPlayerListNode = doc.getChildNodes().item(0);
-        List<SPlayer> elimPlayers= decodeSPlayerList(elimPlayerListNode, tilePile);
+        List<SPlayer> elimPlayers= NetworkAdapter.decodeListOfSPlayer(elimPlayerListNode, tilePile);
 
         is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
         doc = docBuilder.parse(is);
         Node boardNode = doc.getChildNodes().item(0);
-        Board board = new Board(boardNode);
+        Board board = new Board(boardNode, remPlayers);
 
         is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
         doc = docBuilder.parse(is);
@@ -59,15 +62,40 @@ public class PlayATurn {
         Tile playTile = new Tile(playTileNode);
 
         //TODO: run play-turn, encode output
+        //dragon tile ownership in game is established when remaining players are created
+        game.setFromPlayATurnInput(board, remPlayers, elimPlayers, tilePile);
 
-    }
+        Set<SPlayer> losingPlayers = game.playTurn(playTile, remPlayers.get(0));
 
-    private static List<SPlayer> decodeSPlayerList(Node splayerNode, TilePile tilePile) {
-        List<SPlayer> splayers = new ArrayList<>();
-        NodeList splayerNodeList = splayerNode.getChildNodes();
-        for(int i = 0; i < splayerNodeList.getLength(); i++) {
-            splayers.add(new SPlayer(splayerNodeList.item(i), tilePile));
+        doc = docBuilder.newDocument();
+        doc.appendChild(game.getTilePile().encodeTilePile(doc));
+        System.out.println(doc.toString());
+
+        doc = docBuilder.newDocument();
+        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
+        System.out.println(doc.toString());
+
+        doc = docBuilder.newDocument();
+        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getEliminatedPlayers()));
+        System.out.println(doc.toString());
+
+        doc = docBuilder.newDocument();
+        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
+        System.out.println(doc.toString());
+
+        doc = docBuilder.newDocument();
+        doc.appendChild(game.getBoard().encodeBoard(doc));
+        System.out.println(doc.toString());
+
+        doc = docBuilder.newDocument();
+        if(game.isGameOverWithLoss(losingPlayers)){
+            doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
         }
-        return splayers;
+        else {
+            NetworkAdapter.encodeFalse(doc);
+        }
+        System.out.println(doc.toString());
     }
+
+
 }

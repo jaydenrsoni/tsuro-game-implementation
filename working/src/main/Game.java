@@ -47,10 +47,26 @@ public class Game {
         return tilePile;
     }
 
+    public List<SPlayer> getRemainingPlayers() {
+        return remainingPlayers;
+    }
+
+    public List<SPlayer> getEliminatedPlayers() {
+        return eliminatedPlayers;
+    }
+
     //================================================================================
     // Setters
     //================================================================================
     public void setTilePile(TilePile tilePile) {
+        this.tilePile = tilePile;
+    }
+
+    public void setFromPlayATurnInput(Board board, List<SPlayer> remainingPlayers,
+                                      List<SPlayer> eliminatedPlayers, TilePile tilePile) {
+        this.board = board;
+        this.remainingPlayers = remainingPlayers;
+        this.eliminatedPlayers = eliminatedPlayers;
         this.tilePile = tilePile;
     }
 
@@ -78,7 +94,6 @@ public class Game {
         remainingPlayers.add(new SPlayer(aplayer, tilePile));
     }
 
-
     // For testing purposes only
     // TODO: Remove in production
     public void registerPlayer(APlayer aplayer){
@@ -102,6 +117,10 @@ public class Game {
         if (dragonTileOwner == null && tilePile.isEmpty()) {
             dragonTileOwner = splayer;
         }
+    }
+
+    public boolean hasDragonTile(SPlayer splayer){
+        return splayer == dragonTileOwner;
     }
 
     /* TODO: MAKE PRIVATE WHEN NOT DEBUGGING */
@@ -152,6 +171,16 @@ public class Game {
         }
     }
 
+    public boolean isGameOverWithLoss(Set<SPlayer> losingPlayers){
+        if(losingPlayers.containsAll(remainingPlayers) || remainingPlayers.size() <= 1){
+            return true;
+        }
+        if(tilePile.isEmpty() && areAllRemainingHandsEmpty()){
+            return true;
+        }
+        return false;
+    }
+
 
     // Main game loop
     public Set<Color> playGame(){
@@ -172,10 +201,7 @@ public class Game {
             Tile tile = splayer.chooseTile(board);
             try {
                 Set<SPlayer> losingPlayers = playTurn(tile, splayer);
-                if(losingPlayers.containsAll(remainingPlayers) || remainingPlayers.size() <= 1){
-                    break;
-                }
-                if(tilePile.isEmpty() && areAllRemainingHandsEmpty()){
+                if(isGameOverWithLoss(losingPlayers)){
                     break;
                 }
             }

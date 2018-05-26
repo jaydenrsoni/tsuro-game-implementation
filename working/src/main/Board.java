@@ -30,7 +30,7 @@ public class Board {
         }
     }
 
-    public Board(Node boardNode) {
+    public Board(Node boardNode, List<SPlayer> remainingPlayers) {
         this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
         for (int i = 0; i < BOARD_LENGTH; i++) {
             for (int j = 0; j < BOARD_LENGTH; j++) {
@@ -47,7 +47,7 @@ public class Board {
         }
 
         for (int i = 0; i < pawnNodes.getLength(); i++) {
-            //TODO: decode locations and loop through Board Spaces
+            addPawnToBoard(pawnNodes.item(i), remainingPlayers);
         }
     }
 
@@ -274,6 +274,23 @@ public class Board {
         int col = token.getBoardSpace().getCol();
         int tokenSpace = token.getTokenSpace();
         return isOnEdge(row, col, tokenSpace);
+    }
+
+    private SPlayer findPlayerWithColor(Color color, List<SPlayer> splayers){
+        for(SPlayer splayer : splayers) {
+            if (splayer.getColor() == color){
+                return splayer;
+            }
+        }
+        return null;
+    }
+
+    private void addPawnToBoard(Node pawnsEntryNode, List<SPlayer> remainingPlayers) {
+        NodeList pawnsEntryNodeChildren = pawnsEntryNode.getChildNodes();
+        Color pawnColor = Color.decodeColor(pawnsEntryNodeChildren.item(0));
+
+        SPlayer pawnPlayer = findPlayerWithColor(pawnColor, remainingPlayers);
+        pawnPlayer.decodeAddToken(this, pawnColor, pawnsEntryNodeChildren.item(1));
     }
 
     private void addTileToBoard(Node tilesEntryNode) {

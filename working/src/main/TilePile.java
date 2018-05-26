@@ -80,6 +80,10 @@ public class TilePile {
         return tiles.size();
     }
 
+    public Element encodeTilePile(Document doc) {
+        return NetworkAdapter.encodeListOfTiles(doc, new ArrayList<>(tiles));
+    }
+
     //================================================================================
     // Private helpers
     //================================================================================

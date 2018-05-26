@@ -1,9 +1,7 @@
 package main;
 
 import javafx.util.Pair;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 
 /**
  * Created by vyasalwar on 4/16/18.
@@ -21,10 +19,19 @@ public class Token {
     // Constructor
     //================================================================================
     public Token(BoardSpace startingLocation, int startingTokenSpace, SPlayer player, Color color){
-        space = startingLocation;
+        this.space = startingLocation;
         this.player = player;
         space.addToken(this, startingTokenSpace);
         this.color = color;
+    }
+
+    public Token(Board board, SPlayer player, Color color, Node pawnLocNode){
+        this.player = player;
+        this.color = color;
+
+        Pair<BoardSpace, Integer> location = decodePawnLocNode(board, pawnLocNode);
+        space = location.getKey();
+        space.addToken(this, location.getValue());
     }
 
     //================================================================================
@@ -102,6 +109,56 @@ public class Token {
 
         return pawnLocElement;
     }
+
+    //================================================================================
+    // Private helper methods
+    //================================================================================
+
+    private Pair<BoardSpace, Integer> decodePawnLocV(Board board, int n1, int n2) {
+        int colOne = n1 -1;
+        int colTwo = n1;
+        int row = n2 / 2;
+
+        if(colOne == -1 || board.getBoardSpace(row, colOne).hasTile()){
+            int tokenSpace = 7 - (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(row, colTwo), tokenSpace);
+        }
+        else {
+            int tokenSpace = 2 + (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(row, colOne), tokenSpace);
+        }
+    }
+
+    private Pair<BoardSpace, Integer> decodePawnLocH(Board board, int n1, int n2) {
+        int rowOne = n1 - 1;
+        int rowTwo = n1;
+        int col = n2 / 2;
+
+        if(rowOne == -1 || board.getBoardSpace(rowOne, col).hasTile()){
+            int tokenSpace = n2 % 2;
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(rowTwo, col), tokenSpace);
+        }
+        else {
+            int tokenSpace = 5 - (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(rowOne, col), tokenSpace);
+        }
+    }
+
+    private Pair<BoardSpace, Integer> decodePawnLocNode(Board board, Node pawnLocNode) {
+        NodeList pawnLocNodeChildren = pawnLocNode.getChildNodes();
+        Node hvNode = pawnLocNodeChildren.item(0);
+        int n1 = Integer.parseInt(pawnLocNodeChildren.item(1).getTextContent());
+        int n2 = Integer.parseInt(pawnLocNodeChildren.item(2).getTextContent());
+
+
+        if(hvNode.getNodeName().equals("h")){
+            return decodePawnLocH(board, n1, n2);
+        }
+        else{
+            return decodePawnLocV(board, n1, n2);
+        }
+    }
+
 
     private Element encodeHv(Document doc, int tokenSpace) {
         Element hvNode;
@@ -183,16 +240,5 @@ public class Token {
         n2Node.appendChild(n2Text);
         return n2Node;
     }
-
-    //================================================================================
-    // Private helper methods
-    //================================================================================
-
-//    private ServerPawnLoc getServerPawnLoc() {
-//
-//    }
-//
-//    private class ServerPawnLoc
-
 
 }

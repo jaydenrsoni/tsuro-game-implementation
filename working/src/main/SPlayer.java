@@ -1,6 +1,8 @@
 package main;
 
 import javafx.util.Pair;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -59,6 +61,11 @@ public class SPlayer {
     public String getName() {
         return iplayer.getName();
     }
+
+    public void decodeAddToken(Board board, Color color, Node pawnLocNode) {
+        token = new Token(board, this, color, pawnLocNode);
+    }
+
 
     public void initializeSPlayer(Color playerColor, List<Color> otherPlayerColors){
         if (curState != State.GAMEENDED)
@@ -215,6 +222,17 @@ public class SPlayer {
         iplayer.initialize(color, otherPlayerColors);
     }
 
+    public Element encodeSPlayer(Document doc){
+        Element splayerElement = encodeSPlayerTagName(doc);
+
+        Element colorNode = color.encodeColor(doc);
+        splayerElement.appendChild(colorNode);
+
+        Element tileSetNode = NetworkAdapter.encodeSetOfTiles(doc, new HashSet<>(hand));
+        splayerElement.appendChild(tileSetNode);
+
+        return splayerElement;
+    }
 
     //================================================================================
     // Private methods
@@ -222,6 +240,15 @@ public class SPlayer {
     private void requestDragonTile(){
         Game game = Game.getGame();
         game.requestDragonTile(this);
+    }
+
+    private Element encodeSPlayerTagName(Document doc){
+        if(Game.getGame().hasDragonTile(this)){
+            return doc.createElement("splayer-dragon");
+        }
+        else {
+            return doc.createElement("splayer-nodragon");
+        }
     }
 
     //================================================================================
