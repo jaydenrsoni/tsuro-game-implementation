@@ -1,5 +1,7 @@
 package main;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.*;
 
 public class Game {
@@ -232,6 +234,21 @@ public class Game {
         }
 
         return winningColors;
+    }
+
+    public Set<Color> playNetworkedGame() {
+        try {
+            ServerSocket serverSocket = new ServerSocket(NetworkAdapter.PORTNUMBER);
+            while (remainingPlayers.size() < 2) { //can be changed to change the number of players in the game
+                SPlayer splayer = new SPlayer(new NetworkPlayer(serverSocket.accept()), tilePile);
+                remainingPlayers.add(splayer);
+                System.out.println("connected server to " + splayer.getName());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return playGame();
     }
 
 

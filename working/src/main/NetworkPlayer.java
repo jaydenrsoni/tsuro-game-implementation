@@ -3,7 +3,9 @@ package main;
 import javafx.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,7 +32,7 @@ public class NetworkPlayer implements IPlayer {
     private PrintWriter output;
     private BufferedReader input;
 
-    public NetworkPlayer(String hostName, int port) {
+    public NetworkPlayer(Socket socket) {
         docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
@@ -39,13 +41,11 @@ public class NetworkPlayer implements IPlayer {
             e.printStackTrace();
         }
 
+        this.socket = socket;
+
         try {
-            Socket socket = new Socket(hostName, port);
             output = new PrintWriter(socket.getOutputStream(), true);
             input = new BufferedReader( new InputStreamReader(socket.getInputStream()));
-        }
-        catch (UnknownHostException e) {
-            e.printStackTrace();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -66,17 +66,32 @@ public class NetworkPlayer implements IPlayer {
 
     @Override
     public String getName() {
-        Document message = docBuilder.newDocument();
+        Document messageToSend = docBuilder.newDocument();
 
-        Element nameTag = message.createElement("get-name");
-        Text empty = message.createTextNode(" ");
+        Element nameTag = messageToSend.createElement("get-name");
+        Text empty = messageToSend.createTextNode(" ");
         nameTag.appendChild(empty);
-        message.appendChild(nameTag);
+        messageToSend.appendChild(nameTag);
+        sendMessage(messageToSend);
 
-        sendMessage(message);
-        String response = readMessage();
-        
-        return "";
+        String stringResponse = readMessage();
+        InputStream streamResponse = new ByteArrayInputStream(stringResponse.getBytes());
+        try {
+            Document messageResponse = docBuilder.parse(streamResponse);
+            Node playerNameNode = messageResponse.getChildNodes().item(0);
+
+            if(!playerNameNode.getNodeName().equals("player-name")){
+                throw new ContractException("invalid response to get-name");
+            }
+
+            return NetworkAdapter.decodePlayerName(playerNameNode);
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override

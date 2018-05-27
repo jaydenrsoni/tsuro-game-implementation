@@ -1,23 +1,34 @@
-//package test;
-//
-//import main.Color;
-//import main.Game;
-//import main.Players.APlayer;
-//import main.Players.RandomPlayer;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
-//
-//public class IntegrationTest {
-//
-//    Game game;
-//
-//    @Before
-//    public void reset() {
-//        Game.resetGame();
-//        game = Game.getGame();
-//    }
-//
+package test;
+
+import main.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class IntegrationTest {
+
+    Game game;
+
+    @Before
+    public void reset() {
+        Game.resetGame();
+        game = Game.getGame();
+    }
+
+    @Test
+    public void playNetworkedGameTest() {
+        IPlayer keith = new RandomPlayer("keith");
+        IPlayer jayden = new MostSymmetricPlayer("jayden");
+
+
+        ClientAdministratorThread keithAdmin = new ClientAdministratorThread(keith);
+        ClientAdministratorThread jaydenAdmin = new ClientAdministratorThread(jayden);
+        keithAdmin.start();
+        jaydenAdmin.start();
+
+        Assert.assertFalse(game.playNetworkedGame().isEmpty());
+    }
+
 //    @Test
 //    public void playGameTest(){
 //        APlayer vyas = new RandomPlayer("Vyas", Color.BLUE, 0);
@@ -53,4 +64,4 @@
 //            }
 //        }
 //    }
-//}
+}
