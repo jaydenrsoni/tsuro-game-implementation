@@ -87,7 +87,7 @@ public class ClientAdministratorThread extends Thread {
                             throw new ContractException("given function is not part of the interface for iplayer");
                     }
 
-                    sendMessage(responseDocument);
+                    NetworkAdapter.sendMessage(responseDocument, output);
                 }
             }
         } catch (SAXException e) {
@@ -98,20 +98,4 @@ public class ClientAdministratorThread extends Thread {
             e.printStackTrace();
         }
     }
-
-        private void sendMessage(Document message) {
-            DOMSource source = new DOMSource(message);
-            StringWriter writer = new StringWriter();
-            StreamResult result = new StreamResult(writer);
-            try {
-                Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-                transformer.transform(source, result);
-            }
-            catch (TransformerException e) {
-                e.printStackTrace();
-            }
-
-            output.println(writer.toString());
-        }
 }

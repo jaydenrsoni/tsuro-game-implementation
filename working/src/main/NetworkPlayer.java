@@ -10,15 +10,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +21,6 @@ public class NetworkPlayer implements IPlayer {
     private DocumentBuilderFactory docFactory;
     private DocumentBuilder docBuilder;
 
-    private Socket socket;
     private PrintWriter output;
     private BufferedReader input;
 
@@ -40,8 +32,6 @@ public class NetworkPlayer implements IPlayer {
         catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-
-        this.socket = socket;
 
         try {
             output = new PrintWriter(socket.getOutputStream(), true);
@@ -72,12 +62,12 @@ public class NetworkPlayer implements IPlayer {
         Text empty = messageToSend.createTextNode(" ");
         nameTag.appendChild(empty);
         messageToSend.appendChild(nameTag);
-        sendMessage(messageToSend);
+        NetworkAdapter.sendMessage(messageToSend, output);
 
         String stringResponse = readMessage();
-        InputStream streamResponse = new ByteArrayInputStream(stringResponse.getBytes());
+
         try {
-            Document messageResponse = docBuilder.parse(streamResponse);
+            Document messageResponse = NetworkAdapter.stringToDom(stringResponse);
             Node playerNameNode = messageResponse.getChildNodes().item(0);
 
             if(!playerNameNode.getNodeName().equals("player-name")){
@@ -85,9 +75,12 @@ public class NetworkPlayer implements IPlayer {
             }
 
             return NetworkAdapter.decodePlayerName(playerNameNode);
+
         } catch (SAXException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
 
@@ -96,90 +89,141 @@ public class NetworkPlayer implements IPlayer {
 
     @Override
     public void initialize(Color playerColor, List<Color> otherPlayerColors) {
-        Document message = docBuilder.newDocument();
+        Document messageToSend = docBuilder.newDocument();
 
-        Element nameTag = message.createElement("initialize");
-        Element colorNode = playerColor.encodeColor(message);
-        Element listOfColorsNode = NetworkAdapter.encodeListOfColors(message, otherPlayerColors);
+        Element nameTag = messageToSend.createElement("initialize");
+        Element colorNode = playerColor.encodeColor(messageToSend);
+        Element listOfColorsNode = NetworkAdapter.encodeListOfColors(messageToSend, otherPlayerColors);
 
         nameTag.appendChild(colorNode);
         nameTag.appendChild(listOfColorsNode);
 
-        message.appendChild(nameTag);
+        messageToSend.appendChild(nameTag);
 
-        sendMessage(message);
-        String response = readMessage();
+        NetworkAdapter.sendMessage(messageToSend, output);
+        String stringResponse = readMessage();
+
+        try {
+            Document messageResponse = NetworkAdapter.stringToDom(stringResponse);
+            Node initializeNode = messageResponse.getChildNodes().item(0);
+
+            if(!initializeNode.getNodeName().equals("void")){
+                throw new ContractException("invalid response to initialize");
+            }
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Pair<BoardSpace, Integer> placePawn(Board board) {
-        Document message = docBuilder.newDocument();
+        Document messageToSend = docBuilder.newDocument();
 
-        Element nameTag = message.createElement("place-pawn");
-        Element boardNode = board.encodeBoard(message);
+        Element nameTag = messageToSend.createElement("place-pawn");
+        Element boardNode = board.encodeBoard(messageToSend);
 
         nameTag.appendChild(boardNode);
-        message.appendChild(nameTag);
+        messageToSend.appendChild(nameTag);
 
-        sendMessage(message);
-        String response = readMessage();
+        NetworkAdapter.sendMessage(messageToSend, output);
+        String stringResponse = readMessage();
+
+        try {
+            Document messageResponse = NetworkAdapter.stringToDom(stringResponse);
+            Node placePawnNode = messageResponse.getChildNodes().item(0);
+
+            if(!placePawnNode.getNodeName().equals("pawn-loc")){
+                throw new ContractException("invalid response to place-pawn");
+            }
+
+            return NetworkAdapter.decodePawnLocNode(board, placePawnNode);
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }
 
     @Override
     public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft) {
-        Document message = docBuilder.newDocument();
+        Document messageToSend = docBuilder.newDocument();
 
-        Element nameTag = message.createElement("play-turn");
-        Element boardNode = board.encodeBoard(message);
-        Element setOfTileNode = NetworkAdapter.encodeSetOfTiles(message, new HashSet<>(hand));
+        Element nameTag = messageToSend.createElement("play-turn");
+        Element boardNode = board.encodeBoard(messageToSend);
+        Element setOfTileNode = NetworkAdapter.encodeSetOfTiles(messageToSend, new HashSet<>(hand));
 
-        Element nNode = message.createElement("n");
-        Text nText = message.createTextNode(String.valueOf(numberTilesLeft));
+        Element nNode = messageToSend.createElement("n");
+        Text nText = messageToSend.createTextNode(String.valueOf(numberTilesLeft));
         nNode.appendChild(nText);
 
         nameTag.appendChild(boardNode);
         nameTag.appendChild(setOfTileNode);
         nameTag.appendChild(nNode);
-        message.appendChild(nameTag);
+        messageToSend.appendChild(nameTag);
 
-        sendMessage(message);
-        String response = readMessage();
+        NetworkAdapter.sendMessage(messageToSend, output);
+        String stringResponse = readMessage();
+        try {
+            Document messageResponse = NetworkAdapter.stringToDom(stringResponse);
+            Node playTurnNode = messageResponse.getChildNodes().item(0);
+
+            if(!playTurnNode.getNodeName().equals("tile")){
+                throw new ContractException("invalid response to play-turn");
+            }
+
+            return new Tile(playTurnNode);
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }
 
     @Override
     public void endGame(Board board, Set<Color> winningColors) {
-        Document message = docBuilder.newDocument();
+        Document messageToSend = docBuilder.newDocument();
 
-        Element nameTag = message.createElement("play-turn");
-        Element boardNode = board.encodeBoard(message);
-        Element setOfColorNode = NetworkAdapter.encodeSetOfColors(message, winningColors);
+        Element nameTag = messageToSend.createElement("end-game");
+        Element boardNode = board.encodeBoard(messageToSend);
+        Element setOfColorNode = NetworkAdapter.encodeSetOfColors(messageToSend, winningColors);
 
         nameTag.appendChild(boardNode);
         nameTag.appendChild(setOfColorNode);
-        message.appendChild(nameTag);
+        messageToSend.appendChild(nameTag);
 
-        sendMessage(message);
-        String response = readMessage();
-    }
-
-    private void sendMessage(Document message) {
-        DOMSource source = new DOMSource(message);
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
+        NetworkAdapter.sendMessage(messageToSend, output);
+        String stringResponse = readMessage();
         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.transform(source, result);
-        }
-        catch (TransformerException e) {
+            Document messageResponse = NetworkAdapter.stringToDom(stringResponse);
+            Node endGameNode = messageResponse.getChildNodes().item(0);
+
+            if(!endGameNode.getNodeName().equals("void")){
+                throw new ContractException("invalid response to end-game");
+            }
+
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
 
-        output.println(writer.toString());
     }
 
     private String readMessage(){
