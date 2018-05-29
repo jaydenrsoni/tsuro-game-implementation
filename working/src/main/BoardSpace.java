@@ -96,18 +96,18 @@ public class BoardSpace {
 
     // Returns the token space the the token is on.
     //   If the token is not on the space, return -1
-    public int findToken(Token token){
+    public int findToken(Token token) {
         return tokenSpaces.getOrDefault(token, -1);
     }
 
-    public int findColor(Color color){
+    public Token findColor(Color color){
         for (Token token : tokenSpaces.keySet()){
             if(token.getColor() == color){
-                return tokenSpaces.get(token);
+                return token;
             }
         }
 
-        return -1;
+        return null;
     }
 
     public int removeToken(Token token){

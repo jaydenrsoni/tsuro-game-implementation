@@ -35,23 +35,18 @@ public class SPlayer {
         }
     }
 
-    public SPlayer(Node splayerNode, TilePile tilePile){
+    public SPlayer(Node splayerNode, TilePile tilePile, Board board){
         if (splayerNode.getNodeName().equals("splayer-dragon")) {
             requestDragonTile();
         }
         NodeList splayerNodeChildren = splayerNode.getChildNodes();
         this.color = Color.decodeColor(splayerNodeChildren.item(0));
 
-        this.hand = new ArrayList<>();
-        Node handNode = splayerNodeChildren.item(1);
-        NodeList tileNodes = handNode.getChildNodes();
-        for (int i = 0; i < tileNodes.getLength(); i++) {
-            this.hand.add(new Tile(tileNodes.item(i)));
-        }
+        this.hand = new ArrayList<>(NetworkAdapter.decodeSetOfTiles(splayerNodeChildren.item(1)));
         this.tilePile = tilePile;
         this.iplayer = null;
         this.curState = State.GAMEENDED;
-        this.token = null;
+        this.token = board.findTokenFromColor(this.color);
 
     }
 
@@ -63,7 +58,7 @@ public class SPlayer {
     }
 
     public void decodeAddToken(Board board, Color color, Node pawnLocNode) {
-        token = new Token(board, this, color, pawnLocNode);
+        token = new Token(board, color, pawnLocNode);
     }
 
 
@@ -82,7 +77,7 @@ public class SPlayer {
             throw new ContractException();
 
         Pair<BoardSpace, Integer> startingTokenLocation = iplayer.placePawn(board);
-        token = new Token(startingTokenLocation.getKey(), startingTokenLocation.getValue(), this, color);
+        token = new Token(startingTokenLocation.getKey(), startingTokenLocation.getValue(), color);
         curState = State.TURNPLAYABLE;
     }
 
@@ -91,7 +86,7 @@ public class SPlayer {
         if (curState != State.INITIALIZED)
             throw new ContractException();
 
-        token = new Token(startingLocation, startingTokenSpace, this, color);
+        token = new Token(startingLocation, startingTokenSpace, color);
         curState = State.TURNPLAYABLE;
     }
 

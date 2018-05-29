@@ -22,21 +22,11 @@ public class Board {
     //================================================================================
 
     public Board() {
-        this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
-        for (int i = 0; i < BOARD_LENGTH; i++) {
-            for (int j = 0; j < BOARD_LENGTH; j++) {
-                spaces[i][j] = new BoardSpace(i, j);
-            }
-        }
+        initializeSpaces();
     }
 
-    public Board(Node boardNode, List<SPlayer> remainingPlayers) {
-        this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
-        for (int i = 0; i < BOARD_LENGTH; i++) {
-            for (int j = 0; j < BOARD_LENGTH; j++) {
-                spaces[i][j] = new BoardSpace(i, j);
-            }
-        }
+    public Board(Node boardNode) {
+        initializeSpaces();
 
         NodeList boardNodeChildren = boardNode.getChildNodes();
         NodeList tileNodes = boardNodeChildren.item(0).getChildNodes();
@@ -47,9 +37,21 @@ public class Board {
         }
 
         for (int i = 0; i < pawnNodes.getLength(); i++) {
-            addPawnToBoard(pawnNodes.item(i), remainingPlayers);
+            addPawnToBoard(pawnNodes.item(i));
         }
     }
+
+//    public Board(Node boardNode) {
+//        initializeSpaces();
+//
+//        NodeList boardNodeChildren = boardNode.getChildNodes();
+//        NodeList tileNodes = boardNodeChildren.item(0).getChildNodes();
+//        NodeList pawnNodes = boardNodeChildren.item(1).getChildNodes();
+//
+//        for (int i = 0; i < tileNodes.getLength(); i++) {
+//            addTileToBoard(tileNodes.item(i));
+//        }
+//    }
 
     //================================================================================
     // Instance Variables
@@ -164,20 +166,39 @@ public class Board {
         return boardElement;
     }
 
-    //================================================================================
-    // Private Helpers
-    //================================================================================
-    private Pair<BoardSpace, Integer> findLocationFromColor(Color color){
+    public Token findTokenFromColor(Color color) {
         for (int row = 0; row < BOARD_LENGTH; row++){
             for (int col = 0; col < BOARD_LENGTH; col++){
                 BoardSpace boardSpace = getBoardSpace(row, col);
-                int tokenSpace = boardSpace.findColor(color);
-                if (tokenSpace != -1){
-                    return new Pair<BoardSpace, Integer>(boardSpace, tokenSpace);
+                Token token = boardSpace.findColor(color);
+                if (token != null){
+                    return token;
                 }
             }
         }
-        return new Pair<BoardSpace, Integer>(null, null);
+        return null;
+    }
+
+    //================================================================================
+    // Private Helpers
+    //================================================================================
+    private void initializeSpaces() {
+        this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
+        for (int i = 0; i < BOARD_LENGTH; i++) {
+            for (int j = 0; j < BOARD_LENGTH; j++) {
+                spaces[i][j] = new BoardSpace(i, j);
+            }
+        }
+    }
+
+    private Pair<BoardSpace, Integer> findLocationFromColor(Color color){
+        Token token = findTokenFromColor(color);
+        if (token == null) {
+            return new Pair<BoardSpace, Integer>(null, null);
+        }
+        BoardSpace boardSpace = token.getBoardSpace();
+        int tokenSpace = boardSpace.findToken(token);
+        return new Pair<BoardSpace, Integer>(boardSpace, tokenSpace);
     }
 
     private boolean willKillPlayerFromLocation(Tile tile, BoardSpace curSpace, int curTokenSpace){
@@ -285,12 +306,12 @@ public class Board {
         return null;
     }
 
-    private void addPawnToBoard(Node pawnsEntryNode, List<SPlayer> remainingPlayers) {
+    private void addPawnToBoard(Node pawnsEntryNode) {
         NodeList pawnsEntryNodeChildren = pawnsEntryNode.getChildNodes();
         Color pawnColor = Color.decodeColor(pawnsEntryNodeChildren.item(0));
+        //the new token will add itself to the boardspace that is decoded, adding it to the board
+        new Token(this, pawnColor, pawnsEntryNodeChildren.item(1));
 
-        SPlayer pawnPlayer = findPlayerWithColor(pawnColor, remainingPlayers);
-        pawnPlayer.decodeAddToken(this, pawnColor, pawnsEntryNodeChildren.item(1));
     }
 
     private void addTileToBoard(Node tilesEntryNode) {

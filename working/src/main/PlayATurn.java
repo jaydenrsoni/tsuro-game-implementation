@@ -1,9 +1,7 @@
 package main;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -31,7 +28,7 @@ public class PlayATurn {
     private static DocumentBuilder docBuilder;
 
     public static void main(String[] args) throws IOException, SAXException {
-        Scanner sc = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         docFactory = DocumentBuilderFactory.newInstance();
         try {
@@ -43,38 +40,24 @@ public class PlayATurn {
 
         Game game = Game.getGame();
 
-        InputStream is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
-        Document doc = docBuilder.parse(is);
-        Node tileListNode = doc.getChildNodes().item(0);
+        Node tileListNode = parseNextNode(scanner);
+        Node remPlayerListNode = parseNextNode(scanner);
+        Node elimPlayerListNode = parseNextNode(scanner);
+        Node boardNode = parseNextNode(scanner);
+        Node playTileNode = parseNextNode(scanner);
+
         TilePile tilePile = new TilePile(tileListNode);
-
-        is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
-        doc = docBuilder.parse(is);
-        Node remPlayerListNode = doc.getChildNodes().item(0);
-        List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayer(remPlayerListNode, tilePile);
-
-        is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
-        doc = docBuilder.parse(is);
-        Node elimPlayerListNode = doc.getChildNodes().item(0);
-        List<SPlayer> elimPlayers= NetworkAdapter.decodeListOfSPlayer(elimPlayerListNode, tilePile);
-
-        is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
-        doc = docBuilder.parse(is);
-        Node boardNode = doc.getChildNodes().item(0);
-        Board board = new Board(boardNode, remPlayers);
-
-        is = new ByteArrayInputStream(sc.nextLine().getBytes(Charset.defaultCharset()));
-        doc = docBuilder.parse(is);
-        Node playTileNode = doc.getChildNodes().item(0);
+        Board board = new Board(boardNode);
+        List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayers(remPlayerListNode, tilePile, board);
+        List<SPlayer> elimPlayers= NetworkAdapter.decodeListOfSPlayers(elimPlayerListNode, tilePile, board);
         Tile playTile = new Tile(playTileNode);
 
-        //TODO: run play-turn, encode output
         //dragon tile ownership in game is established when remaining players are created
         game.setFromPlayATurnInput(board, remPlayers, elimPlayers, tilePile);
 
         Set<SPlayer> losingPlayers = game.playTurn(playTile, remPlayers.get(0));
 
-        doc = docBuilder.newDocument();
+        Document doc = docBuilder.newDocument();
         doc.appendChild(game.getTilePile().encodeTilePile(doc));
         printdoc(doc);
 
@@ -113,6 +96,12 @@ public class PlayATurn {
             e.printStackTrace();
         }
         System.out.println(writer.toString());
+    }
+
+    private static Node parseNextNode(Scanner scanner) throws IOException, SAXException {
+        InputStream inputStream = new ByteArrayInputStream(scanner.nextLine().getBytes(Charset.defaultCharset()));
+        Document doc = docBuilder.parse(inputStream);
+        return doc.getChildNodes().item(0);
     }
 
 }

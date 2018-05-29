@@ -135,8 +135,11 @@ public class Game {
 
             Set<Token> failedTokens = board.placeTile(tile, splayer);
             Set<SPlayer> failedPlayers = new HashSet<>();
-            for (Token failedToken : failedTokens)
-                failedPlayers.add(failedToken.getPlayer());
+            for (SPlayer remainingPlayer : remainingPlayers) {
+                if(failedTokens.contains(remainingPlayer.getToken())){
+                    failedPlayers.add(remainingPlayer);
+                }
+            }
 
             if (failedPlayers.containsAll(remainingPlayers))
                 return failedPlayers;

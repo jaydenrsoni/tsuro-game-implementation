@@ -5,9 +5,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Set;
+
 public class IntegrationTest {
 
-    Game game;
+    private Game game;
 
     @Before
     public void reset() {
@@ -18,7 +20,7 @@ public class IntegrationTest {
     @Test
     public void playNetworkedGameTest() {
         IPlayer keith = new RandomPlayer("keith");
-        IPlayer jayden = new MostSymmetricPlayer("jayden");
+        IPlayer jayden = new RandomPlayer("jayden");
 
 
         ClientAdministratorThread keithAdmin = new ClientAdministratorThread(keith);
@@ -26,7 +28,9 @@ public class IntegrationTest {
         keithAdmin.start();
         jaydenAdmin.start();
 
-        Assert.assertFalse(game.playNetworkedGame().isEmpty());
+        Set<Color> winners = game.playNetworkedGame();
+        System.out.println(winners);
+        Assert.assertFalse(winners.isEmpty());
     }
 
 //    @Test

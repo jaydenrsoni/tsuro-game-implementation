@@ -228,7 +228,7 @@ public class NetworkPlayer implements IPlayer {
 
     private String readMessage(){
         try {
-            return input.readLine();
+            return input.readLine().replaceAll("\\s+", "");
         } catch (IOException e) {
             e.printStackTrace();
         }

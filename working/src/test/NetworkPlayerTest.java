@@ -4,7 +4,12 @@ import main.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -109,5 +114,20 @@ public class NetworkPlayerTest {
         NetworkPlayer networkPlayer = new NetworkPlayer();
 
         networkPlayer.endGame(board, new HashSet<>(colorList));
+    }
+
+    @Test
+    public void encodeDecodeListOfColorsTest() throws ParserConfigurationException {
+        List<Color> colors = new ArrayList<>();
+        colors.add(Color.BLUE);
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element listOfColorsNode = NetworkAdapter.encodeListOfColors(doc, colors);
+        List<Color> newColors = NetworkAdapter.decodeListOfColors(listOfColorsNode);
+        Assert.assertEquals(colors, newColors);
     }
 }

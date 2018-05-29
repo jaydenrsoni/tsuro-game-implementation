@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -126,9 +127,9 @@ public class NetworkAdapter {
         return splayerListElement;
     }
 
-    public static Element encodePlayerName(Document doc, IPlayer iplayer){
+    public static Element encodePlayerName(Document doc, String playerName){
         Element playerNameNode = doc.createElement("player-name");
-        Text playerNameText = doc.createTextNode(iplayer.getName());
+        Text playerNameText = doc.createTextNode(playerName);
         playerNameNode.appendChild(playerNameText);
         return playerNameNode;
     }
@@ -137,14 +138,144 @@ public class NetworkAdapter {
         return playerNameNode.getTextContent();
     }
 
-    public static List<SPlayer> decodeListOfSPlayer(Node splayerNode, TilePile tilePile) {
+    public static List<SPlayer> decodeListOfSPlayers(Node splayersNode, TilePile tilePile, Board board) {
         List<SPlayer> splayers = new ArrayList<>();
-        NodeList splayerNodeList = splayerNode.getChildNodes();
+        NodeList splayerNodeList = splayersNode.getChildNodes();
         for(int i = 0; i < splayerNodeList.getLength(); i++) {
-            splayers.add(new SPlayer(splayerNodeList.item(i), tilePile));
+            splayers.add(new SPlayer(splayerNodeList.item(i), tilePile, board));
         }
         return splayers;
     }
+
+    public static List<Color> decodeListOfColors(Node colorsNode) {
+        List<Color> colors = new ArrayList<>();
+        NodeList colorNodeList = colorsNode.getChildNodes();
+        for(int i = 0; i < colorNodeList.getLength(); i++) {
+            colors.add(Color.decodeColor(colorNodeList.item(i)));
+        }
+        return colors;
+    }
+
+    public static Set<Color> decodeSetOfColors(Node colorsNode) {
+        Set<Color> colors = new HashSet<>();
+        NodeList colorNodeSet = colorsNode.getChildNodes();
+        for(int i = 0; i < colorNodeSet.getLength(); i++) {
+            colors.add(Color.decodeColor(colorNodeSet.item(i)));
+        }
+        return colors;
+    }
+
+    public static Set<Tile> decodeSetOfTiles(Node tilesNode) {
+        Set<Tile> tiles = new HashSet<>();
+        NodeList tileNodeList = tilesNode.getChildNodes();
+        for (int i = 0; i < tileNodeList.getLength(); i++) {
+            tiles.add(new Tile(tileNodeList.item(i)));
+        }
+        return tiles;
+    }
+
+    public static int decodeN(Node nNode) {
+        return Integer.parseInt(nNode.getTextContent());
+    }
+
+    public static Element encodePawnLoc(Document doc, BoardSpace boardSpace, int tokenSpace) {
+        int row = boardSpace.getRow();
+        int col = boardSpace.getCol();
+
+        Element pawnLocElement = doc.createElement("pawn-loc");
+        Element hvNode = encodeHv(doc, tokenSpace);
+        Element n1Node = encodeN1(doc, tokenSpace, row, col);
+        Element n2Node = encodeN2(doc, tokenSpace, row, col);
+
+
+        pawnLocElement.appendChild(hvNode);
+        pawnLocElement.appendChild(n1Node);
+        pawnLocElement.appendChild(n2Node);
+
+        return pawnLocElement;
+    }
+
+    private static Element encodeHv(Document doc, int tokenSpace) {
+        Element hvNode;
+        switch(tokenSpace){
+            case 0:
+            case 1:
+            case 4:
+            case 5:
+                hvNode = doc.createElement("h");
+                break;
+            case 2:
+            case 3:
+            case 6:
+            case 7:
+                hvNode = doc.createElement("v");
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        Text hvText = doc.createTextNode(" ");
+        hvNode.appendChild(hvText);
+
+        return hvNode;
+    }
+
+    private static Element encodeN1(Document doc, int tokenSpace, int row, int col) {
+        Element n1Node = doc.createElement("n");
+        Text n1Text;
+        switch(tokenSpace) {
+            case 0:
+            case 1:
+                n1Text = doc.createTextNode(String.valueOf(row));
+                break;
+            case 2:
+            case 3:
+                n1Text = doc.createTextNode(String.valueOf(col + 1));
+                break;
+            case 4:
+            case 5:
+                n1Text = doc.createTextNode(String.valueOf(row + 1));
+                break;
+            case 6:
+            case 7:
+                n1Text = doc.createTextNode(String.valueOf(col));
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        n1Node.appendChild(n1Text);
+        return n1Node;
+    }
+
+    private static Element encodeN2(Document doc, int tokenSpace, int row, int col) {
+        Element n2Node = doc.createElement("n");
+        Text n2Text;
+        switch (tokenSpace) {
+            case 0:
+            case 5:
+                n2Text = doc.createTextNode(String.valueOf(col*2));
+                break;
+            case 1:
+            case 4:
+                n2Text = doc.createTextNode(String.valueOf(col*2 + 1));
+                break;
+            case 2:
+            case 7:
+                n2Text = doc.createTextNode(String.valueOf(row*2));
+                break;
+            case 3:
+            case 6:
+                n2Text = doc.createTextNode(String.valueOf(row*2 + 1));
+                break;
+            default:
+                throw new IllegalArgumentException("invalid tokenSpace");
+        }
+
+        n2Node.appendChild(n2Text);
+        return n2Node;
+    }
+
 
     public static Pair<BoardSpace, Integer> decodePawnLocNode(Board board, Node pawnLocNode) {
         NodeList pawnLocNodeChildren = pawnLocNode.getChildNodes();
