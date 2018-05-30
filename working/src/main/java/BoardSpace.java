@@ -1,5 +1,3 @@
-package main;
-
 //import org.omg.PortableServer.THREAD_POLICY_ID;
 
 import java.util.*;

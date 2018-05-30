@@ -1,5 +1,3 @@
-package main;
-
 //import apple.laf.JRSUIConstants;
 import javafx.util.Pair;
 
