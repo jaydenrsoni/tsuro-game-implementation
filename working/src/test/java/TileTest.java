@@ -2,8 +2,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.Assert;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by vyasalwar on 4/19/18.
  */
@@ -16,10 +14,10 @@ public class TileTest {
         Tile t3 = new Tile(4,5,6,7,0,1,2,3);
         Tile t4 = new Tile(0, 2, 1, 3, 4, 5, 6, 7);
 
-        Assert.assertTrue(t1.equals(t2));
-        Assert.assertTrue(t2.equals(t1));
-        Assert.assertTrue(t2.equals(t3));
-        Assert.assertFalse(t1.equals(t4));
+        Assert.assertEquals(t1, t2);
+        Assert.assertEquals(t2, t1);
+        Assert.assertEquals(t2, t3);
+        Assert.assertNotEquals(t1, t4);
     }
 
     @Test
@@ -29,8 +27,8 @@ public class TileTest {
         Tile t2 = new Tile(t1);
         t1.rotateClockwise();
 
-        Assert.assertTrue(t1.equals(t1));
-        Assert.assertTrue(t1.equals(t2));
+        Assert.assertEquals(t1, t1);
+        Assert.assertEquals(t1, t2);
     }
 
     @Test

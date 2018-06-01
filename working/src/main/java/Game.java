@@ -96,9 +96,10 @@ public class Game {
 
     // For testing purposes only
     // TODO: Remove in production
-    public void registerPlayer(APlayer aplayer){
-        SPlayer newPlayer = new SPlayer(aplayer, tilePile);
+    public SPlayer registerPlayer(IPlayer iplayer){
+        SPlayer newPlayer = new SPlayer(iplayer, tilePile);
         remainingPlayers.add(newPlayer);
+        return newPlayer;
     }
 
     // Determine whether a player has the ability to play the move.

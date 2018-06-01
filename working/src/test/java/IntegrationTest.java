@@ -30,39 +30,39 @@ public class IntegrationTest {
         Assert.assertFalse(winners.isEmpty());
     }
 
-//    @Test
-//    public void playGameTest(){
-//        APlayer vyas = new RandomPlayer("Vyas", Color.BLUE, 0);
-//        APlayer keith = new RandomPlayer("Keith", Color.BLACK, 0);
-//
-//        game.registerPlayer(vyas);
-//        game.registerPlayer(keith);
-//
-//        Assert.assertFalse(game.playGame().isEmpty());
-//    }
-//
-//    @Test
-//    public void playManyGamesTest() {
-//        for(int seed = 0; seed < 10000; seed++){
-//            try {
-//                game.resetGame();
-//                game = Game.getGame();
-//                game.getTilePile().shuffleDeck(seed);
-//
-//                APlayer vyas = new RandomPlayer("Vyas", Color.BLUE, seed);
-//                APlayer keith = new RandomPlayer("Keith", Color.BLACK, seed);
-//                APlayer robby = new RandomPlayer("Robby", Color.GREY, seed);
-//
-//                game.registerPlayer(vyas);
-//                game.registerPlayer(keith);
-//                game.registerPlayer(robby);
-//
-//                Assert.assertFalse(game.playGame().isEmpty());
-//            }
-//            catch (Exception e){
-//                System.err.println("Failed with seed " + seed);
-//                throw e;
-//            }
-//        }
-//    }
+    @Test
+    public void playGameTest(){
+        IPlayer vyas = new RandomPlayer("Vyas", 0);
+        IPlayer keith = new RandomPlayer("Keith", 0);
+
+        game.registerPlayer(vyas);
+        game.registerPlayer(keith);
+
+        Assert.assertFalse(game.playGame().isEmpty());
+    }
+
+    @Test
+    public void playManyGamesTest() {
+        for(int seed = 0; seed < 100; seed++){
+            try {
+                game.resetGame();
+                game = Game.getGame();
+                game.getTilePile().shuffleDeck(seed);
+
+                IPlayer vyas = new RandomPlayer("Vyas", seed);
+                IPlayer keith = new RandomPlayer("Keith", seed);
+                IPlayer robby = new RandomPlayer("Robby", seed);
+
+                game.registerPlayer(vyas);
+                game.registerPlayer(keith);
+                game.registerPlayer(robby);
+
+                Assert.assertFalse(game.playGame().isEmpty());
+            }
+            catch (Exception e){
+                System.err.println("Failed with seed " + seed);
+                throw e;
+            }
+        }
+    }
 }
