@@ -128,38 +128,46 @@ public class Game {
     // Deal with when the player place the tile on the board
     //   Returns a set of players who have lost after the tile is placed
     public Set<SPlayer> playTurn(Tile tile, SPlayer splayer) throws ContractException{
-            if (!isLegalMove(tile, splayer)) {
-                throw new ContractException("Player made an illegal move");
+        if (!isLegalMove(tile, splayer)) {
+            blamePlayer(splayer);
+            return new HashSet<>();
+        }
+
+        Set<Token> failedTokens = board.placeTile(tile, splayer);
+        Set<SPlayer> failedPlayers = new HashSet<>();
+        for (SPlayer remainingPlayer : remainingPlayers) {
+            if(failedTokens.contains(remainingPlayer.getToken())){
+                failedPlayers.add(remainingPlayer);
             }
+        }
 
-            Set<Token> failedTokens = board.placeTile(tile, splayer);
-            Set<SPlayer> failedPlayers = new HashSet<>();
-            for (SPlayer remainingPlayer : remainingPlayers) {
-                if(failedTokens.contains(remainingPlayer.getToken())){
-                    failedPlayers.add(remainingPlayer);
-                }
-            }
-
-            if (failedPlayers.containsAll(remainingPlayers))
-                return failedPlayers;
-
-            splayer.removeTileFromHand(tile);
-            splayer.drawFromPile();
-
-            if (!failedPlayers.isEmpty()) {
-                for (SPlayer failedPlayer : failedPlayers)
-                    failedPlayer.returnTilesToPile();
-
-                SPlayer playerToDrawFirst = findPlayerToDrawFirst(failedPlayers, splayer);
-
-                for (SPlayer failedPlayer : failedPlayers)
-                    eliminatePlayer(failedPlayer);
-
-
-                drawAfterElimination(playerToDrawFirst);
-            }
-
+        if (failedPlayers.containsAll(remainingPlayers))
             return failedPlayers;
+
+        splayer.removeTileFromHand(tile);
+        splayer.drawFromPile();
+
+        if (!failedPlayers.isEmpty()) {
+            for (SPlayer failedPlayer : failedPlayers)
+                failedPlayer.returnTilesToPile();
+
+            SPlayer playerToDrawFirst = findPlayerToDrawFirst(failedPlayers, splayer);
+
+            for (SPlayer failedPlayer : failedPlayers)
+                eliminatePlayer(failedPlayer);
+
+
+            drawAfterElimination(playerToDrawFirst);
+        }
+
+        eliminatedPlayers.addAll(failedPlayers);
+
+        if(!eliminatedPlayers.contains(splayer)){
+            remainingPlayers.remove(splayer);
+            remainingPlayers.add(splayer);
+        }
+
+        return failedPlayers;
     }
 
     public void initializePlayers(){
@@ -194,12 +202,6 @@ public class Game {
             splayer.placeToken(board);
         }
 
-        /*
-        for (int i = 0; remainingPlayers.size() <= 1; i = (i + 1) % remainingPlayers.size())
-         */
-
-//        int i = 0;
-        //is blaming system good?
         while (true) {
             SPlayer splayer = remainingPlayers.get(0);
             Tile tile = splayer.chooseTile(board);
@@ -212,11 +214,6 @@ public class Game {
             catch (ContractException e) {
                 blamePlayer(splayer);
                 continue;
-            }
-
-            if(!eliminatedPlayers.contains(splayer)){
-                remainingPlayers.remove(splayer);
-                remainingPlayers.add(splayer);
             }
 
 //            if (remainingPlayers.get(i).equals(splayer))

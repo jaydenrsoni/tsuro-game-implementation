@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class TilePile {
 
-    final private String DEFAULT_FILE_PATH = "tiles.txt";
+    final private String DEFAULT_FILE_PATH = "../../../tiles.txt";
 
     public TilePile(){
         tiles = new LinkedList<>();

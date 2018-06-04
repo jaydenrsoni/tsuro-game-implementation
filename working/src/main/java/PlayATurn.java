@@ -27,7 +27,6 @@ public class PlayATurn {
 
     public static void main(String[] args) throws IOException, SAXException {
         Scanner scanner = new Scanner(System.in);
-
         docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
@@ -35,50 +34,57 @@ public class PlayATurn {
         catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
+        while (true) {
+            //System.err.println("began turn " + i);
+            Game.resetGame();
+            Game game = Game.getGame();
 
-        Game game = Game.getGame();
+            Node tileListNode = parseNextNode(scanner);
+            //System.err.println("parse first node turn " + i);
+            Node remPlayerListNode = parseNextNode(scanner);
+            Node elimPlayerListNode = parseNextNode(scanner);
+            Node boardNode = parseNextNode(scanner);
+            Node playTileNode = parseNextNode(scanner);
 
-        Node tileListNode = parseNextNode(scanner);
-        Node remPlayerListNode = parseNextNode(scanner);
-        Node elimPlayerListNode = parseNextNode(scanner);
-        Node boardNode = parseNextNode(scanner);
-        Node playTileNode = parseNextNode(scanner);
+            TilePile tilePile = new TilePile(tileListNode);
+            Board board = new Board(boardNode);
+            List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayers(remPlayerListNode, tilePile, board);
+            List<SPlayer> elimPlayers = NetworkAdapter.decodeListOfSPlayers(elimPlayerListNode, tilePile, board);
+            Tile playTile = new Tile(playTileNode);
 
-        TilePile tilePile = new TilePile(tileListNode);
-        Board board = new Board(boardNode);
-        List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayers(remPlayerListNode, tilePile, board);
-        List<SPlayer> elimPlayers= NetworkAdapter.decodeListOfSPlayers(elimPlayerListNode, tilePile, board);
-        Tile playTile = new Tile(playTileNode);
+            //TODO: this adds the play tile to the current player's hand to work with our code
+            remPlayers.get(0).addTileToHand(playTile);
 
-        //dragon tile ownership in game is established when remaining players are created
-        game.setFromPlayATurnInput(board, remPlayers, elimPlayers, tilePile);
+            //dragon tile ownership in game is established when remaining players are created
+            game.setFromPlayATurnInput(board, remPlayers, elimPlayers, tilePile);
 
-        Set<SPlayer> losingPlayers = game.playTurn(playTile, remPlayers.get(0));
+            Set<SPlayer> losingPlayers = game.playTurn(playTile, remPlayers.get(0));
 
-        Document doc = docBuilder.newDocument();
-        doc.appendChild(game.getTilePile().encodeTilePile(doc));
-        printdoc(doc);
+            Document doc = docBuilder.newDocument();
+            doc.appendChild(game.getTilePile().encodeTilePile(doc));
+            printdoc(doc);
 
-        doc = docBuilder.newDocument();
-        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
-        printdoc(doc);
-
-        doc = docBuilder.newDocument();
-        doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getEliminatedPlayers()));
-        printdoc(doc);
-
-        doc = docBuilder.newDocument();
-        doc.appendChild(game.getBoard().encodeBoard(doc));
-        printdoc(doc);
-
-        doc = docBuilder.newDocument();
-        if(game.isGameOverWithLoss(losingPlayers)){
+            doc = docBuilder.newDocument();
             doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
+            printdoc(doc);
+
+            doc = docBuilder.newDocument();
+            doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getEliminatedPlayers()));
+            printdoc(doc);
+
+            doc = docBuilder.newDocument();
+            doc.appendChild(game.getBoard().encodeBoard(doc));
+            printdoc(doc);
+
+            doc = docBuilder.newDocument();
+            if (game.isGameOverWithLoss(losingPlayers)) {
+                doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
+            } else {
+                doc.appendChild(NetworkAdapter.encodeFalse(doc));
+            }
+            printdoc(doc);
+            //System.err.println("ended turn " + i);
         }
-        else {
-            NetworkAdapter.encodeFalse(doc);
-        }
-        printdoc(doc);
     }
 
     public static void printdoc(Document doc) {
@@ -93,11 +99,13 @@ public class PlayATurn {
         catch (TransformerException e) {
             e.printStackTrace();
         }
-        System.out.println(writer.toString());
+        System.out.println(writer.toString().replaceAll("\\s+", ""));
     }
 
     private static Node parseNextNode(Scanner scanner) throws IOException, SAXException {
-        InputStream inputStream = new ByteArrayInputStream(scanner.nextLine().getBytes(Charset.defaultCharset()));
+        String nextLine = scanner.nextLine();
+        //System.out.println(nextLine);
+        InputStream inputStream = new ByteArrayInputStream(nextLine.getBytes(Charset.defaultCharset()));
         Document doc = docBuilder.parse(inputStream);
         return doc.getChildNodes().item(0);
     }

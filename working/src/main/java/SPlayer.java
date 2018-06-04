@@ -27,6 +27,7 @@ public class SPlayer {
         this.curState = State.GAMEENDED;
         this.token = null;
         this.hand = new ArrayList<>();
+        this.otherPlayerColors = new ArrayList<>();
 
         for(int i = 0; i < MAX_TILES_IN_BANK; i++){
             drawFromPile();
@@ -45,6 +46,7 @@ public class SPlayer {
         this.iplayer = null;
         this.curState = State.GAMEENDED;
         this.token = board.findTokenFromColor(this.color);
+        this.otherPlayerColors = new ArrayList<>();
 
     }
 
@@ -147,6 +149,10 @@ public class SPlayer {
         return hand.isEmpty();
     }
 
+    public void addTileToHand(Tile tile) {
+        hand.add(tile);
+    }
+
     public void removeTileFromHand(Tile tile){
         hand.remove(tile);
     }
@@ -211,7 +217,7 @@ public class SPlayer {
     }
 
     public void replaceWithRandom(){
-        iplayer = new RandomPlayer(iplayer.getName());
+        iplayer = new RandomPlayer(color.toString() + " replacement");
         iplayer.initialize(color, otherPlayerColors);
     }
 
