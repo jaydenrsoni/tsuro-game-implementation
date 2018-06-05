@@ -129,11 +129,13 @@ public class GameTest {
 
         game.playTurn(testTile, vyasSplayer);
 
+        Token vyasToken = vyasSplayer.getToken();
+
         Assert.assertNull(vyasSplayer.getTile(0));
         Assert.assertNull(vyasSplayer.getTile(1));
         Assert.assertNull(vyasSplayer.getTile(2));
-        Assert.assertEquals(spaceOne.findToken(vyasSplayer.getToken()), -1);
-        Assert.assertNull(vyasSplayer.getToken().getBoardSpace());
+        Assert.assertTrue(Board.isOnEdge(vyasToken));
+        Assert.assertEquals(vyasSplayer.getToken().getBoardSpace(), spaceOne);
     }
 
     @Test

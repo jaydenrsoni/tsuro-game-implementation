@@ -63,4 +63,14 @@ public class TileTest {
         Assert.assertEquals(tile3.calculateSymmetries(), 1);
     }
 
+    @Test
+    public void debugTest() {
+        Tile tile1inHand = new Tile(0, 2, 1, 4, 3, 7, 5, 6);
+        Tile tile2inHand = new Tile(0, 4, 1, 3, 2, 7, 5, 6);
+        Tile playTile = new Tile(0, 2, 1, 4, 3, 6, 5, 7);
+
+        Assert.assertNotEquals(tile1inHand, playTile);
+        Assert.assertNotEquals(tile2inHand, playTile);
+    }
+
 }

@@ -107,7 +107,7 @@ public class BoardTest {
         Assert.assertTrue(lowerSpace.hasTile());
         Assert.assertTrue(upperSpace.hasTile());
         Assert.assertEquals(lowerSpace.getTokensOnSpace().size(), 0);
-        Assert.assertEquals(upperSpace.getTokensOnSpace().size(), 0);
+        Assert.assertEquals(upperSpace.getTokensOnSpace().size(), 1);
         Assert.assertEquals(vyas.getToken().getBoardSpace().getRow(), 1);
         Assert.assertEquals(vyas.getToken().getBoardSpace().getCol(), 1);
         Assert.assertEquals(vyas.getToken().getTokenSpace(), 7);

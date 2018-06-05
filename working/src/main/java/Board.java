@@ -286,7 +286,7 @@ public class Board {
         return topEdge || rightEdge || bottomEdge || leftEdge;
     }
 
-    private static boolean isOnEdge(Token token) {
+    public static boolean isOnEdge(Token token) {
 
         int row = token.getBoardSpace().getRow();
         int col = token.getBoardSpace().getCol();
