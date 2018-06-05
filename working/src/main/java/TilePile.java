@@ -20,7 +20,7 @@ public class TilePile {
 
     public TilePile(){
         tiles = new LinkedList<>();
-        fillTiles(DEFAULT_FILE_PATH);
+        //fillTiles(DEFAULT_FILE_PATH);
     }
 
     public TilePile(String filename){

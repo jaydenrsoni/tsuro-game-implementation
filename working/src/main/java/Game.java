@@ -160,8 +160,6 @@ public class Game {
             drawAfterElimination(playerToDrawFirst);
         }
 
-        eliminatedPlayers.addAll(failedPlayers);
-
         if(!eliminatedPlayers.contains(splayer)){
             remainingPlayers.remove(splayer);
             remainingPlayers.add(splayer);
@@ -259,6 +257,9 @@ public class Game {
     private void resetDragonTile(){
         if (dragonTileOwner != null){
             dragonTileOwner = null;
+        }
+        else {
+            //System.err.println("Request for dragon tile failed.");
         }
     }
 

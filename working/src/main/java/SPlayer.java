@@ -37,6 +37,7 @@ public class SPlayer {
     public SPlayer(Node splayerNode, TilePile tilePile, Board board){
         if (splayerNode.getNodeName().equals("splayer-dragon")) {
             requestDragonTile();
+            //System.err.println("dragon player parsed");
         }
         NodeList splayerNodeChildren = splayerNode.getChildNodes();
         this.color = Color.decodeColor(splayerNodeChildren.item(0));

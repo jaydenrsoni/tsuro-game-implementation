@@ -105,7 +105,6 @@ public class Board {
             // Eliminate the token if necessary
             if (isOnEdge(token)) {
                 eliminatedPlayers.add(token);
-                token.removeFromBoard();
             }
         }
 
