@@ -23,11 +23,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ * Static functions for use encoding and decoding
+ *
+ */
 public class NetworkAdapter {
+    //================================================================================
+    // Public Final Static Variables
+    //================================================================================
 
     public final static String HOSTNAME = "localhost";
     public final static int PORTNUMBER = 4000;
     public final static SocketAddress SOCKETADDRESS = new InetSocketAddress(HOSTNAME, PORTNUMBER);
+
+    //================================================================================
+    // XML Conversion Helpers
+    //================================================================================
 
     public static Document stringToDom(String xmlSource) throws SAXException, ParserConfigurationException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -48,8 +60,12 @@ public class NetworkAdapter {
             e.printStackTrace();
         }
 
-        output.println(writer.toString());
+        output.println(writer.toString().replaceAll("\\s+", ""));
     }
+
+    //================================================================================
+    // Encoding Helpers
+    //================================================================================
 
     public static Element encodeVoid(Document doc) {
         Element voidElement = doc.createElement("void");
@@ -63,6 +79,25 @@ public class NetworkAdapter {
         Text falseText = doc.createTextNode(" ");
         falseElement.appendChild(falseText);
         return falseElement;
+    }
+
+    public static Element encodePlayerName(Document doc, String playerName){
+        Element playerNameNode = doc.createElement("player-name");
+        Text playerNameText = doc.createTextNode(playerName);
+        playerNameNode.appendChild(playerNameText);
+        return playerNameNode;
+    }
+
+    public static Element encodeListOfSPlayers(Document doc, List<SPlayer> list) {
+        Element splayerListElement = doc.createElement("list");
+        Text spaceText = doc.createTextNode(" ");
+        splayerListElement.appendChild(spaceText);
+
+        for (SPlayer splayer : list) {
+            splayerListElement.appendChild(splayer.encodeSPlayer(doc));
+        }
+
+        return splayerListElement;
     }
 
     public static Element encodeListOfColors(Document doc, List<Color> list) {
@@ -113,23 +148,29 @@ public class NetworkAdapter {
         return tileSetElement;
     }
 
-    public static Element encodeListOfSPlayers(Document doc, List<SPlayer> list){
-        Element splayerListElement = doc.createElement("list");
-        Text spaceText = doc.createTextNode(" ");
-        splayerListElement.appendChild(spaceText);
+    public static Element encodePawnLoc(Document doc, BoardSpace boardSpace, int tokenSpace) {
+        int row = boardSpace.getRow();
+        int col = boardSpace.getCol();
 
-        for(SPlayer splayer : list) {
-            splayerListElement.appendChild(splayer.encodeSPlayer(doc));
-        }
+        Element pawnLocElement = doc.createElement("pawn-loc");
+        Element hvNode = encodeHv(doc, tokenSpace);
+        Element n1Node = encodeN1(doc, tokenSpace, row, col);
+        Element n2Node = encodeN2(doc, tokenSpace, row, col);
 
-        return splayerListElement;
+
+        pawnLocElement.appendChild(hvNode);
+        pawnLocElement.appendChild(n1Node);
+        pawnLocElement.appendChild(n2Node);
+
+        return pawnLocElement;
     }
 
-    public static Element encodePlayerName(Document doc, String playerName){
-        Element playerNameNode = doc.createElement("player-name");
-        Text playerNameText = doc.createTextNode(playerName);
-        playerNameNode.appendChild(playerNameText);
-        return playerNameNode;
+    //================================================================================
+    // Decoding Helpers
+    //================================================================================
+
+    public static int decodeN(Node nNode) {
+        return Integer.parseInt(nNode.getTextContent());
     }
 
     public static String decodePlayerName(Node playerNameNode){
@@ -172,26 +213,24 @@ public class NetworkAdapter {
         return tiles;
     }
 
-    public static int decodeN(Node nNode) {
-        return Integer.parseInt(nNode.getTextContent());
+    public static Pair<BoardSpace, Integer> decodePawnLocNode(Board board, Node pawnLocNode) {
+        NodeList pawnLocNodeChildren = pawnLocNode.getChildNodes();
+        Node hvNode = pawnLocNodeChildren.item(0);
+        int n1 = Integer.parseInt(pawnLocNodeChildren.item(1).getTextContent());
+        int n2 = Integer.parseInt(pawnLocNodeChildren.item(2).getTextContent());
+
+
+        if(hvNode.getNodeName().equals("h")){
+            return decodePawnLocH(board, n1, n2);
+        }
+        else{
+            return decodePawnLocV(board, n1, n2);
+        }
     }
 
-    public static Element encodePawnLoc(Document doc, BoardSpace boardSpace, int tokenSpace) {
-        int row = boardSpace.getRow();
-        int col = boardSpace.getCol();
-
-        Element pawnLocElement = doc.createElement("pawn-loc");
-        Element hvNode = encodeHv(doc, tokenSpace);
-        Element n1Node = encodeN1(doc, tokenSpace, row, col);
-        Element n2Node = encodeN2(doc, tokenSpace, row, col);
-
-
-        pawnLocElement.appendChild(hvNode);
-        pawnLocElement.appendChild(n1Node);
-        pawnLocElement.appendChild(n2Node);
-
-        return pawnLocElement;
-    }
+    //================================================================================
+    // Private Helpers
+    //================================================================================
 
     private static Element encodeHv(Document doc, int tokenSpace) {
         Element hvNode;
@@ -274,28 +313,20 @@ public class NetworkAdapter {
         return n2Node;
     }
 
-
-    public static Pair<BoardSpace, Integer> decodePawnLocNode(Board board, Node pawnLocNode) {
-        NodeList pawnLocNodeChildren = pawnLocNode.getChildNodes();
-        Node hvNode = pawnLocNodeChildren.item(0);
-        int n1 = Integer.parseInt(pawnLocNodeChildren.item(1).getTextContent());
-        int n2 = Integer.parseInt(pawnLocNodeChildren.item(2).getTextContent());
-
-
-        if(hvNode.getNodeName().equals("h")){
-            return decodePawnLocH(board, n1, n2);
-        }
-        else{
-            return decodePawnLocV(board, n1, n2);
-        }
-    }
-
     private static Pair<BoardSpace, Integer> decodePawnLocV(Board board, int n1, int n2) {
         int colOne = n1 -1;
         int colTwo = n1;
         int row = n2 / 2;
 
-        if(colOne == -1 || board.getBoardSpace(row, colOne).hasTile()){
+        if(colOne == -1){
+            int tokenSpace = 7 - (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(row, colTwo), tokenSpace);
+        }
+        else if(colTwo == 6){
+            int tokenSpace = 2 + (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(row, colOne), tokenSpace);
+        }
+        else if(board.getBoardSpace(row, colOne).hasTile()){
             int tokenSpace = 7 - (n2 % 2);
             return new Pair<BoardSpace, Integer>(board.getBoardSpace(row, colTwo), tokenSpace);
         }
@@ -310,7 +341,15 @@ public class NetworkAdapter {
         int rowTwo = n1;
         int col = n2 / 2;
 
-        if(rowOne == -1 || board.getBoardSpace(rowOne, col).hasTile()){
+        if(rowOne == -1) {
+            int tokenSpace = n2 % 2;
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(rowTwo, col), tokenSpace);
+        }
+        else if(rowTwo == 6){
+            int tokenSpace = 5 - (n2 % 2);
+            return new Pair<BoardSpace, Integer>(board.getBoardSpace(rowOne, col), tokenSpace);
+        }
+        else if(board.getBoardSpace(rowOne, col).hasTile()){
             int tokenSpace = n2 % 2;
             return new Pair<BoardSpace, Integer>(board.getBoardSpace(rowTwo, col), tokenSpace);
         }

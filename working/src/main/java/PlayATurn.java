@@ -5,16 +5,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Scanner;
@@ -52,7 +46,7 @@ public class PlayATurn {
             List<SPlayer> elimPlayers = NetworkAdapter.decodeListOfSPlayers(elimPlayerListNode, tilePile, board);
             Tile playTile = new Tile(playTileNode);
 
-            //TODO: this adds the play tile to the current player's hand to work with our code
+            //this adds the play tile to the current player's hand to work with our code
             remPlayers.get(0).addTileToHand(playTile);
 
             //dragon tile ownership in game is established when remaining players are created
@@ -62,19 +56,19 @@ public class PlayATurn {
 
             Document doc = docBuilder.newDocument();
             doc.appendChild(game.getTilePile().encodeTilePile(doc));
-            printdoc(doc);
+            printDoc(doc);
 
             doc = docBuilder.newDocument();
             doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getRemainingPlayers()));
-            printdoc(doc);
+            printDoc(doc);
 
             doc = docBuilder.newDocument();
             doc.appendChild(NetworkAdapter.encodeListOfSPlayers(doc, game.getEliminatedPlayers()));
-            printdoc(doc);
+            printDoc(doc);
 
             doc = docBuilder.newDocument();
             doc.appendChild(game.getBoard().encodeBoard(doc));
-            printdoc(doc);
+            printDoc(doc);
 
             doc = docBuilder.newDocument();
             if (game.isGameOverWithLoss(losingPlayers)) {
@@ -82,24 +76,13 @@ public class PlayATurn {
             } else {
                 doc.appendChild(NetworkAdapter.encodeFalse(doc));
             }
-            printdoc(doc);
+            printDoc(doc);
             //System.err.println("ended turn " + i);
         }
     }
 
-    public static void printdoc(Document doc) {
-        DOMSource source = new DOMSource(doc);
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-        try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.transform(source, result);
-        }
-        catch (TransformerException e) {
-            e.printStackTrace();
-        }
-        System.out.println(writer.toString().replaceAll("\\s+", ""));
+    public static void printDoc(Document doc) {
+        NetworkAdapter.sendMessage(doc, new PrintWriter(System.out, true));
     }
 
     private static Node parseNextNode(Scanner scanner) throws IOException, SAXException {
