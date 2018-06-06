@@ -14,11 +14,15 @@ import java.util.*;
  * Created by vyasalwar on 4/16/18.
  */
 public class Board {
+    //================================================================================
+    // Instance Variables
+    //================================================================================
+    private BoardSpace[][] spaces;
+    private final static int BOARD_LENGTH = 6;
 
     //================================================================================
-    // Constructor
+    // Constructors
     //================================================================================
-
     public Board() {
         initializeSpaces();
     }
@@ -39,29 +43,11 @@ public class Board {
         }
     }
 
-//    public Board(Node boardNode) {
-//        initializeSpaces();
-//
-//        NodeList boardNodeChildren = boardNode.getChildNodes();
-//        NodeList tileNodes = boardNodeChildren.item(0).getChildNodes();
-//        NodeList pawnNodes = boardNodeChildren.item(1).getChildNodes();
-//
-//        for (int i = 0; i < tileNodes.getLength(); i++) {
-//            addTileToBoard(tileNodes.item(i));
-//        }
-//    }
-
-    //================================================================================
-    // Instance Variables
-    //================================================================================
-    private BoardSpace[][] spaces;
-    final static int BOARD_LENGTH = 6;
-
     //================================================================================
     // Getters
     //================================================================================
     public BoardSpace getBoardSpace(int row, int col) {
-        if (!isValidCoordinate(row, col))
+        if (isInvalidCoordinate(row, col))
             throw new IllegalArgumentException("Invalid Tile Access");
 
         return spaces[row][col];
@@ -70,7 +56,6 @@ public class Board {
     //================================================================================
     // Public methods
     //================================================================================
-
     // Returns true if there is a tile on the row and col
     public boolean isOccupied(int row, int col) {
         return getBoardSpace(row, col).hasTile();
@@ -79,11 +64,7 @@ public class Board {
     // Returns true if placing the tile in front of the token will lead to the player's death
     // Does not actually place the tile
     public boolean willKillPlayer(Tile tile, SPlayer splayer) {
-        Token token = splayer.getToken();
-        BoardSpace curSpace = token.getBoardSpace();
-        int curTokenSpace = token.getTokenSpace();
-
-        return willKillPlayerFromLocation(tile, curSpace, curTokenSpace);
+        return willKillToken(tile, splayer.getToken());
     }
 
     // Places the tile in front of the splayer, regardless of whether it will kill the splayer
@@ -111,26 +92,14 @@ public class Board {
         return eliminatedPlayers;
     }
 
-    public boolean hasSafeMove(List<Tile> hand, BoardSpace boardSpace, int tokenSpace){
-        for (Tile tile: hand){
-            Tile copy = new Tile(tile);
-            for (int i = 0; i < 4; i++){
-                copy.rotateClockwise();
-                if (!willKillPlayerFromLocation(copy, boardSpace, tokenSpace))
-                    return true;
-            }
-        }
-        return false;
-    }
-
     public List<Tile> findLegalMovesForPlayer(List<Tile> hand, Color color){
         List<Tile> legalMoves = new ArrayList<>();
-        Pair<BoardSpace, Integer> location = findLocationFromColor(color);
-        boolean hasSafeMoves = hasSafeMove(hand, location.getKey(), location.getValue());
+        Token token = findTokenFromColor(color);
+        boolean hasSafeMoves = hasSafeMove(hand, token);
 
         for (Tile tile: hand){
             for (int rotation = 0; rotation < 4; rotation++){
-                if (!hasSafeMoves || !willKillPlayerFromLocation(tile, location.getKey(), location.getValue()))
+                if (!hasSafeMoves || !willKillToken(tile, token))
                     legalMoves.add(new Tile (tile));
                 tile.rotateClockwise();
             }
@@ -152,17 +121,6 @@ public class Board {
         return null;
     }
 
-    public Element encodeBoard(Document doc) {
-        Element boardElement = doc.createElement("board");
-        Element tilesNode = encodeTiles(doc);
-        Element pawnsNode = encodePawns(doc);
-
-        boardElement.appendChild(tilesNode);
-        boardElement.appendChild(pawnsNode);
-
-        return boardElement;
-    }
-
     public Token findTokenFromColor(Color color) {
         for (int row = 0; row < BOARD_LENGTH; row++){
             for (int col = 0; col < BOARD_LENGTH; col++){
@@ -173,7 +131,7 @@ public class Board {
                 }
             }
         }
-        return null;
+        throw new IllegalArgumentException("Color provided is not playing the game dead or alive");
     }
 
     //================================================================================
@@ -188,38 +146,29 @@ public class Board {
         }
     }
 
-    private Pair<BoardSpace, Integer> findLocationFromColor(Color color){
-        Token token = findTokenFromColor(color);
-        if (token == null) {
-            return new Pair<BoardSpace, Integer>(null, null);
-        }
-        BoardSpace boardSpace = token.getBoardSpace();
-        int tokenSpace = boardSpace.findToken(token);
-        return new Pair<BoardSpace, Integer>(boardSpace, tokenSpace);
-    }
+    private boolean willKillToken(Tile tile, Token token){
+        BoardSpace curSpace = token.getBoardSpace();
+        int curTokenSpace = token.getTokenSpace();
 
-    private boolean willKillPlayerFromLocation(Tile tile, BoardSpace curSpace, int curTokenSpace){
-        try {
-            // Move to the space across the tile
-            curTokenSpace = tile.findMatch(curTokenSpace);
+        // Trace out a path by moving across spaces with tiles on them
+        while (curSpace.hasTile() || curSpace == token.getBoardSpace()){
+            Tile curTile = getCurTile(curSpace, tile, token);
+
+            curTokenSpace = curTile.findMatch(curTokenSpace);
+            if (isOnEdge(curSpace.getRow(), curSpace.getCol(), curTokenSpace))
+                return true;
+
             curSpace = getNextSpace(curSpace, curTokenSpace);
             curTokenSpace = Token.getMirroredTokenSpace(curTokenSpace);
-
-            // Trace out a path by moving across spaces with tiles on them
-            while (curSpace.hasTile()){
-                curTokenSpace = curSpace.getTile().findMatch(curTokenSpace);
-                curSpace = getNextSpace(curSpace, curTokenSpace);
-                curTokenSpace = Token.getMirroredTokenSpace(curTokenSpace);
-            }
-            // We've walked to a place on the board without a tile
-            return false;
         }
+        // We've walked to a place on the board without a tile
+        return false;
+    }
 
-        catch (IllegalArgumentException e){
-            // We've walked to a place off the board since we're trying to
-            //   access a space with an invalid coordinate
-            return true;
-        }
+    private Tile getCurTile(BoardSpace space, Tile originalTile, Token token) {
+        if(space == token.getBoardSpace())
+            return originalTile;
+        return space.getTile();
     }
 
     // Gets the adjacent space of an arbitrary board space and token space.
@@ -237,18 +186,10 @@ public class Board {
         return getBoardSpace(row, col);
     }
 
-    // Gets the adjacent space that the token is on.
-    //  Returns null if token is on the edge
-    private BoardSpace getNextSpace(Token token) {
-        return getNextSpace(token.getBoardSpace(), token.getTokenSpace());
-    }
-
-    // Moves a token from a board space to its adjacent board space.
-    //  Assumes the token is not on the edge
+    // Moves a token from a board space to its adjacent board space
     private void transferToken(Token token) {
-
         int nextTokenSpace = token.findNextTokenSpace();
-        BoardSpace nextSpace = getNextSpace(token);
+        BoardSpace nextSpace = getNextSpace(token.getBoardSpace(), token.getTokenSpace());
         token.moveToken(nextSpace, nextTokenSpace);
     }
 
@@ -268,61 +209,30 @@ public class Board {
         }
     }
 
-    // Returns true if the row and col pair are a valid address in the board
-    public static boolean isValidCoordinate(int row, int col) {
-        return (0 <= row && row < BOARD_LENGTH) && (0 <= col && col < BOARD_LENGTH);
-    }
-
-    private static boolean isOnEdge(int row, int col, int tokenSpace) {
-        if (!isValidCoordinate(row, col))
-            throw new IllegalArgumentException("Invalid Tile Access");
-
-        int direction = tokenSpace / 2;
-        boolean topEdge    = row == 0 && direction == 0;
-        boolean rightEdge  = col == 5 && direction == 1;
-        boolean bottomEdge = row == 5 && direction == 2;
-        boolean leftEdge   = col == 0 && direction == 3;
-
-        return topEdge || rightEdge || bottomEdge || leftEdge;
-    }
-
-    public static boolean isOnEdge(Token token) {
-
-        int row = token.getBoardSpace().getRow();
-        int col = token.getBoardSpace().getCol();
-        int tokenSpace = token.getTokenSpace();
-        return isOnEdge(row, col, tokenSpace);
-    }
-
-    private SPlayer findPlayerWithColor(Color color, List<SPlayer> splayers){
-        for(SPlayer splayer : splayers) {
-            if (splayer.getColor() == color){
-                return splayer;
+    private boolean hasSafeMove(List<Tile> hand, Token token){
+        for (Tile tile: hand){
+            Tile copy = new Tile(tile);
+            for (int i = 0; i < 4; i++){
+                copy.rotateClockwise();
+                if (!willKillToken(copy, token))
+                    return true;
             }
         }
-        return null;
+        return false;
     }
 
-    private void addPawnToBoard(Node pawnsEntryNode) {
-        NodeList pawnsEntryNodeChildren = pawnsEntryNode.getChildNodes();
-        Color pawnColor = Color.decodeColor(pawnsEntryNodeChildren.item(0));
-        //the new token will add itself to the boardspace that is decoded, adding it to the board
-        new Token(this, pawnColor, pawnsEntryNodeChildren.item(1));
+    //================================================================================
+    // XML Helpers
+    //================================================================================
+    public Element encodeBoard(Document doc) {
+        Element boardElement = doc.createElement("board");
+        Element tilesNode = encodeTiles(doc);
+        Element pawnsNode = encodePawns(doc);
 
-    }
+        boardElement.appendChild(tilesNode);
+        boardElement.appendChild(pawnsNode);
 
-    private void addTileToBoard(Node tilesEntryNode) {
-        NodeList tilesEntryNodeChildren = tilesEntryNode.getChildNodes();
-        BoardSpace boardSpace = boardSpaceFromXYNode(tilesEntryNodeChildren.item(0));
-        Tile tile = new Tile(tilesEntryNodeChildren.item(1));
-        boardSpace.setTile(tile);
-    }
-
-    private BoardSpace boardSpaceFromXYNode(Node XYNode) {
-        NodeList XYNodeChildren = XYNode.getChildNodes();
-        int row = Integer.parseInt(XYNodeChildren.item(1).getTextContent());
-        int col = Integer.parseInt(XYNodeChildren.item(0).getTextContent());
-        return getBoardSpace(row, col);
+        return boardElement;
     }
 
     private Element encodeTiles(Document doc) {
@@ -389,5 +299,56 @@ public class Board {
         }
 
         return pawnsElement;
+    }
+
+    private void addPawnToBoard(Node pawnsEntryNode) {
+        NodeList pawnsEntryNodeChildren = pawnsEntryNode.getChildNodes();
+        Color pawnColor = Color.decodeColor(pawnsEntryNodeChildren.item(0));
+        //the new token will add itself to the boardspace that is decoded, adding it to the board
+        new Token(this, pawnColor, pawnsEntryNodeChildren.item(1));
+
+    }
+
+    private void addTileToBoard(Node tilesEntryNode) {
+        NodeList tilesEntryNodeChildren = tilesEntryNode.getChildNodes();
+        BoardSpace boardSpace = boardSpaceFromXYNode(tilesEntryNodeChildren.item(0));
+        Tile tile = new Tile(tilesEntryNodeChildren.item(1));
+        boardSpace.setTile(tile);
+    }
+
+    private BoardSpace boardSpaceFromXYNode(Node XYNode) {
+        NodeList XYNodeChildren = XYNode.getChildNodes();
+        int row = Integer.parseInt(XYNodeChildren.item(1).getTextContent());
+        int col = Integer.parseInt(XYNodeChildren.item(0).getTextContent());
+        return getBoardSpace(row, col);
+    }
+
+    //================================================================================
+    // Static Functions
+    //================================================================================
+    // Returns true if the row and col pair are a valid address in the board
+    public static boolean isInvalidCoordinate(int row, int col) {
+        return (row < 0 || row >= BOARD_LENGTH) || (col < 0 || col >= BOARD_LENGTH);
+    }
+
+    public static boolean isOnEdge(Token token) {
+
+        int row = token.getBoardSpace().getRow();
+        int col = token.getBoardSpace().getCol();
+        int tokenSpace = token.getTokenSpace();
+        return isOnEdge(row, col, tokenSpace);
+    }
+
+    private static boolean isOnEdge(int row, int col, int tokenSpace) {
+        if (isInvalidCoordinate(row, col))
+            throw new IllegalArgumentException("Invalid Tile Access");
+
+        int direction = tokenSpace / 2;
+        boolean topEdge    = row == 0 && direction == 0;
+        boolean rightEdge  = col == 5 && direction == 1;
+        boolean bottomEdge = row == 5 && direction == 2;
+        boolean leftEdge   = col == 0 && direction == 3;
+
+        return topEdge || rightEdge || bottomEdge || leftEdge;
     }
 }

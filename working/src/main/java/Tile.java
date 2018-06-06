@@ -5,6 +5,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.HashSet;
+import java.util.InvalidPropertiesFormatException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,8 +41,7 @@ public class Tile {
         connections.add(new TileConnection(startC, endC));
         connections.add(new TileConnection(startD, endD));
 
-        if (!isValid())
-            throw new InstantiationError("Tile created with invalid arguments");
+        assertValid();
     }
 
     // Constructor that reads from an input file.
@@ -57,8 +57,7 @@ public class Tile {
             connections.add(new TileConnection(endpointA, endpointB));
         }
 
-        if (!isValid())
-            throw new InstantiationError("Tile created with invalid arguments");
+        assertValid();
     }
 
     // Constructor from other object. Clones other tile into this one
@@ -167,21 +166,17 @@ public class Tile {
     //================================================================================
 
     // Checks to make sure the tile contains all numbers 0..7 exactly once
-    private boolean isValid(){
+    private void assertValid(){
         // A valid tile is a bijective map from {0..7} to itself
-        try {
-            Set<Integer> nums = new HashSet<>();
-            for (int i = 0; i < 8; i++) {
-                nums.add(findMatch(i));
-            }
 
-            // if nums.size() != 8, then the map is not onto
-            return nums.size() == 8;
+        Set<Integer> nums = new HashSet<>();
+        for (int i = 0; i < 8; i++) {
+            nums.add(findMatch(i));
         }
-        catch (IllegalArgumentException e) {
-            // Does not contain some value in {0..7}, i.e. it's not one-to-one
-            return false;
-        }
+
+        // if nums.size() != 8, then the map is not onto
+        if(nums.size() != 8)
+            throw new IllegalArgumentException("Tile connections are not valid");
     }
 
 

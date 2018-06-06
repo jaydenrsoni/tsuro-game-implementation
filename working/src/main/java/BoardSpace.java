@@ -27,7 +27,7 @@ public class BoardSpace {
         this.row = row;
         this.col = col;
 
-        if (!Board.isValidCoordinate(row, col)){
+        if (Board.isInvalidCoordinate(row, col)){
             throw new IllegalArgumentException("Invalid Tile Access");
         }
     }

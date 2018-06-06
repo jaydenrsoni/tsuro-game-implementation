@@ -47,12 +47,10 @@ public class TilePile {
     // Public methods
     //================================================================================
     public Tile drawFromDeck(){
-        try {
+        if(!tiles.isEmpty()){
             return tiles.removeFirst();
         }
-        catch (NoSuchElementException e) {
-            return null;
-        }
+        return null;
     }
 
     public void shuffleDeck(){

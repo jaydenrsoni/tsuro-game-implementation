@@ -1,3 +1,4 @@
+import com.sun.source.tree.AssertTree;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Assert;
@@ -195,6 +196,40 @@ public class BoardTest {
         Assert.assertTrue(board.willKillPlayer(tile, vyas));
         Set<Token> losers = board.placeTile(tile, vyas);
         Assert.assertEquals(losers.size(), 4);
+    }
+
+    @Test
+    public void PlayerKilledThroughTileTwice(){
+        /* Setup */
+        Board board = new Board();
+        BoardSpace start = board.getBoardSpace(0, 0);
+        SPlayer vyas = new SPlayer(new RandomPlayer("Vyas"), tilePile);
+        vyas.initializeSPlayer(Color.BLUE, new ArrayList<>());
+        vyas.placeToken(start, 7);
+
+        Tile tile = new Tile(2, 7, 3, 6, 0, 5, 1, 4);
+        Tile loopingTile = new Tile(0, 1, 2, 3, 4, 5, 6, 7);
+        board.getBoardSpace(0, 1).setTile(loopingTile);
+
+        /*
+        Goal:
+            - A player can die even when moving across multiple tiles
+
+            Tile            Board
+                                 ____________
+               | |        start |x x x x x x |  end
+               +-+              |            |
+          V ----------          |            |
+            ----------          |            |
+               +-+              |            |
+               | |              |____________|
+         */
+
+        Assert.assertTrue(board.willKillPlayer(tile, vyas));
+
+        Set<Token> losers = board.placeTile(tile, vyas);
+        Assert.assertEquals(losers.size(), 1);
+        Assert.assertTrue(losers.contains(vyas.getToken()));
     }
 
     @Test
