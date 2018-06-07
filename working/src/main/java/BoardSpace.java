@@ -51,10 +51,6 @@ public class BoardSpace {
         return new HashSet<>(tokenSpaces.keySet());
     }
 
-    public Set<Integer> getTokenSpacesWithTokens() {
-        return new HashSet<>(tokenSpaces.values());
-    }
-
     //================================================================================
     // Setters
     //================================================================================

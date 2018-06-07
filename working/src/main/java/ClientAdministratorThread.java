@@ -62,36 +62,36 @@ public class ClientAdministratorThread extends Thread {
 
             while (!socket.isClosed()) {
                 if (socket.getInputStream().available() > 0) {
-                    System.out.println("input available on " + iplayer.getName());
+                    //System.out.println("input available on " + iplayer.getName());
                     InputStream is = new ByteArrayInputStream(input.readLine().replaceAll("\\s+", "").getBytes());
                     Document inputDocument = docBuilder.parse(is);
                     Node functionNode = inputDocument.getChildNodes().item(0);
 
                     Document responseDocument = docBuilder.newDocument();
-                    System.out.println("input has function name " + functionNode.getNodeName());
+                    //System.out.println("input has function name " + functionNode.getNodeName());
                     switch (functionNode.getNodeName()) {
                         case "get-name":
-                            System.out.println("player " + iplayer.getName() + " received get-name call");
+                            //System.out.println("player " + iplayer.getName() + " received get-name call");
                             Element playerNameNode = getNameCaller(responseDocument);
                             responseDocument.appendChild(playerNameNode);
                             break;
                         case "initialize":
-                            System.out.println("player " + iplayer.getName() + " received initialize call");
+                            //System.out.println("player " + iplayer.getName() + " received initialize call");
                             Element initializeVoidNode = initializeCaller(responseDocument, functionNode);
                             responseDocument.appendChild(initializeVoidNode);
                             break;
                         case "place-pawn":
-                            System.out.println("player " + iplayer.getName() + " received place-pawn call");
+                            //System.out.println("player " + iplayer.getName() + " received place-pawn call");
                             Element pawnLocNode = placePawnCaller(responseDocument, functionNode);
                             responseDocument.appendChild(pawnLocNode);
                             break;
                         case "play-turn":
-                            System.out.println("player " + iplayer.getName() + " received play-turn call");
+                            //System.out.println("player " + iplayer.getName() + " received play-turn call");
                             Element tileNode = playTurnCaller(responseDocument, functionNode);
                             responseDocument.appendChild(tileNode);
                             break;
                         case "end-game":
-                            System.out.println("player " + iplayer.getName() + " received end-game call");
+                            //System.out.println("player " + iplayer.getName() + " received end-game call");
                             Element endGameVoidNode = endGameCaller(responseDocument, functionNode);
                             responseDocument.appendChild(endGameVoidNode);
                             break;
@@ -161,13 +161,9 @@ public class ClientAdministratorThread extends Thread {
     }
 
 
-    public static void main(String[] args)  {
-        IPlayer keith = new RandomPlayer("keith");
-        ClientAdministratorThread keithAdmin = new ClientAdministratorThread(keith);
-        keithAdmin.start();
-
-        IPlayer jayden = new RandomPlayer("jayden");
-        ClientAdministratorThread jaydenAdmin = new ClientAdministratorThread(jayden);
-        jaydenAdmin.start();
+    public static void main(String[] args) {
+        IPlayer player = new RandomPlayer(args[0]);
+        ClientAdministratorThread playerAdmin = new ClientAdministratorThread(player);
+        playerAdmin.start();
     }
 }
