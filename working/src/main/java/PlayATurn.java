@@ -16,25 +16,22 @@ import java.util.Set;
 
 public class PlayATurn {
 
-    private static DocumentBuilderFactory docFactory;
     private static DocumentBuilder docBuilder;
 
     public static void main(String[] args) throws IOException, SAXException {
         Scanner scanner = new Scanner(System.in);
-        docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
         }
         catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        while (true) {
-            //System.err.println("began turn " + i);
+        while (scanner.hasNext()) {
             Game.resetGame();
             Game game = Game.getGame();
 
             Node tileListNode = parseNextNode(scanner);
-            //System.err.println("parse first node turn " + i);
             Node remPlayerListNode = parseNextNode(scanner);
             Node elimPlayerListNode = parseNextNode(scanner);
             Node boardNode = parseNextNode(scanner);
@@ -77,11 +74,10 @@ public class PlayATurn {
                 doc.appendChild(NetworkAdapter.encodeFalse(doc));
             }
             printDoc(doc);
-            //System.err.println("ended turn " + i);
         }
     }
 
-    public static void printDoc(Document doc) {
+    private static void printDoc(Document doc) {
         NetworkAdapter.sendMessage(doc, new PrintWriter(System.out, true));
     }
 

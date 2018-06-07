@@ -16,14 +16,18 @@ import java.util.Set;
 
 public class NetworkPlayer implements IPlayer {
 
-    private DocumentBuilderFactory docFactory;
+    //================================================================================
+    // Instance Variables
+    //================================================================================
     private DocumentBuilder docBuilder;
-
     private PrintWriter output;
     private BufferedReader input;
 
+    //================================================================================
+    // Constructors
+    //================================================================================
     public NetworkPlayer(Socket socket) {
-        docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
         }
@@ -41,16 +45,9 @@ public class NetworkPlayer implements IPlayer {
 
     }
 
-    public NetworkPlayer() {
-        docFactory = DocumentBuilderFactory.newInstance();
-        try {
-            docBuilder = docFactory.newDocumentBuilder();
-        }
-        catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-
-    }
+    //================================================================================
+    // Override Methods
+    //================================================================================
 
     @Override
     public String getName() {
@@ -223,6 +220,10 @@ public class NetworkPlayer implements IPlayer {
         }
 
     }
+
+    //================================================================================
+    // Private Helpers
+    //================================================================================
 
     private String readMessage(){
         try {

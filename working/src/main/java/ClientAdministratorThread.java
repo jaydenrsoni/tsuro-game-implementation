@@ -16,19 +16,26 @@ import java.util.Set;
 
 public class ClientAdministratorThread extends Thread {
 
+    //================================================================================
+    // Instance Variables
+    //================================================================================
+
     private IPlayer iplayer;
-    private DocumentBuilderFactory docFactory;
     private DocumentBuilder docBuilder;
 
     private Socket socket;
     private PrintWriter output;
     private BufferedReader input;
 
+    //================================================================================
+    // Constructors
+    //================================================================================
+
     public ClientAdministratorThread(IPlayer iplayer){
         super(iplayer.getName());
         this.iplayer = iplayer;
 
-        docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
             docBuilder = docFactory.newDocumentBuilder();
         }
@@ -38,6 +45,10 @@ public class ClientAdministratorThread extends Thread {
 
         socket = new Socket();
     }
+
+    //================================================================================
+    // Override Methods
+    //================================================================================
 
     @Override
     public void run() {
@@ -99,6 +110,10 @@ public class ClientAdministratorThread extends Thread {
             e.printStackTrace();
         }
     }
+
+    //================================================================================
+    // Private Helpers
+    //================================================================================
 
     private Element getNameCaller(Document responseDocument) {
         String playerName = iplayer.getName();
