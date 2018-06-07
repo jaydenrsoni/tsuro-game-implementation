@@ -1,7 +1,14 @@
 /**
- * Created by vyasalwar on 5/8/18.
+ *
+ * Called to expose contract violations
+ *
  */
 public class ContractException extends RuntimeException {
+
+    //================================================================================
+    // Constructors
+    //================================================================================
+
     public ContractException() {
     }
 

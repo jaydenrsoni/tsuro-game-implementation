@@ -1,8 +1,10 @@
 import java.util.List;
-import java.util.Set;
+
 
 /**
- * Created by vyasalwar on 5/3/18.
+ *
+ * Abstract implementation of an IPlayer that selects tiles to play based on some score
+ *
  */
 public abstract class ScorePlayer extends APlayer {
 

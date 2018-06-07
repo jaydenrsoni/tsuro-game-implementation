@@ -10,13 +10,27 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * A collection of all Tiles in Tsuro
  *
- * Created by vyasalwar on 4/16/18.
+ *  Representation of the deck of tiles
+ *
  */
 public class TilePile {
 
+    //================================================================================
+    // Text file with all Tsuro tiles
+    //================================================================================
+
     final private String DEFAULT_FILE_PATH = "tiles.txt";
+
+    //================================================================================
+    // Instance Variable
+    //================================================================================
+
+    private Deque<Tile> tiles;
+
+    //================================================================================
+    // Constructors
+    //================================================================================
 
     public TilePile(){
         tiles = new LinkedList<>();
@@ -37,15 +51,10 @@ public class TilePile {
         }
     }
 
-    //=====b===========================================================================
-    // Instance Variables
     //================================================================================
-    private Deque<Tile> tiles;
+    // Public Methods
+    //================================================================================
 
-
-    //================================================================================
-    // Public methods
-    //================================================================================
     public Tile drawFromDeck(){
         if(!tiles.isEmpty()){
             return tiles.removeFirst();
@@ -81,7 +90,7 @@ public class TilePile {
     }
 
     //================================================================================
-    // Private helpers
+    // Private Helpers
     //================================================================================
 
     // Initialize the TilePile using the tiles specified in the given file
@@ -102,6 +111,4 @@ public class TilePile {
             e.printStackTrace();
         }
     }
-
-
 }

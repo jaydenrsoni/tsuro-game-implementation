@@ -4,7 +4,9 @@ import java.util.Random;
 
 
 /**
- * Created by vyasalwar on 4/30/18.
+ *
+ * IPlayer that always plays the least symmetric tile
+ *
  */
 public class LeastSymmetricPlayer extends ScorePlayer {
 

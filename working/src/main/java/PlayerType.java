@@ -1,4 +1,6 @@
 /**
- * Created by vyasalwar on 4/16/18.
+ *
+ * Represents possible types of players
+ *
  */
-public enum PlayerType { RANDOM, MOSTSYMMETRIC, LEASTSYMMETRIC, HUMAN}
+public enum PlayerType { RANDOM, MOSTSYMMETRIC, LEASTSYMMETRIC}

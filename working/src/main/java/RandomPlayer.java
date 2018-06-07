@@ -1,20 +1,25 @@
-//import apple.laf.JRSUIConstants;
 import javafx.util.Pair;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
+/**
+ *
+ * IPlayer that picks tiles to play at random
+ *
+ */
 public class RandomPlayer extends APlayer {
 
     //================================================================================
     // Instance variables
     //================================================================================
+
     private Random random;
 
     //================================================================================
-    // Constructor
+    // Constructors
     //================================================================================
+
     public RandomPlayer(String name){
         super(name);
         random = new Random();
@@ -26,11 +31,11 @@ public class RandomPlayer extends APlayer {
         random = new Random(seed);
     }
 
-
-
     //================================================================================
-    // Override methods
+    // Public Methods
     //================================================================================
+
+    @Override
     public Pair<BoardSpace, Integer> getStartingLocation(Board board){
         return board.getRandomAvailableStartingLocation(random);
     }

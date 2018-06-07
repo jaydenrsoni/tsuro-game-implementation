@@ -13,8 +13,6 @@ import java.util.Set;
  *
  * Represents a single Tile in Tsuro
  *
- * Created by vyasalwar on 4/15/18.
- *
  */
 public class Tile {
 
@@ -45,7 +43,7 @@ public class Tile {
     }
 
     // Constructor that reads from an input file.
-    //   See TilePile.fillAllTiles to see usage
+    //  See TilePile.fillAllTiles to see usage
     public Tile(String fileLine){
         connections = new HashSet<>();
 
@@ -79,7 +77,7 @@ public class Tile {
 
 
     //================================================================================
-    // Public methods
+    // Public Methods
     //================================================================================
 
     // Rotates the entire tile clockwise.
@@ -119,8 +117,6 @@ public class Tile {
         return symmetries;
     }
 
-
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Tile) {
@@ -150,19 +146,8 @@ public class Tile {
         return ret + "}";
     }
 
-    public Element encodeTile(Document doc) {
-        Element tileElement = doc.createElement("tile");
-
-        for(TileConnection connect : connections) {
-            Element connectElement = connect.encodeConnect(doc);
-            tileElement.appendChild(connectElement);
-        }
-
-        return tileElement;
-    }
-
     //================================================================================
-    // Private helper methods
+    // Private Helpers
     //================================================================================
 
     // Checks to make sure the tile contains all numbers 0..7 exactly once
@@ -179,14 +164,37 @@ public class Tile {
             throw new IllegalArgumentException("Tile connections are not valid");
     }
 
+    //================================================================================
+    // XML Helper
+    //================================================================================
+
+    public Element encodeTile(Document doc) {
+        Element tileElement = doc.createElement("tile");
+
+        for(TileConnection connect : connections) {
+            Element connectElement = connect.encodeConnect(doc);
+            tileElement.appendChild(connectElement);
+        }
+
+        return tileElement;
+    }
+
 
     //================================================================================
-    // Private helper class
+    // Private Helper Class
     //================================================================================
     private class TileConnection {
 
+        //================================================================================
+        // Instance Variables
+        //================================================================================
+
         private int endpointA;
         private int endpointB;
+
+        //================================================================================
+        // Constructors
+        //================================================================================
 
         // Explicit constructor
         public TileConnection (int endpointA, int endpointB) {
@@ -207,6 +215,10 @@ public class Tile {
             this.endpointB = Integer.parseInt(endpointPair.item(1).getTextContent());
 
         }
+
+        //================================================================================
+        // Public Methods
+        //================================================================================
 
         // Returns true if the argument is one of the endpoints
         public boolean contains(int endpoint){
@@ -249,6 +261,10 @@ public class Tile {
             return "(" + endpointA + ", " + endpointB + ")";
         }
 
+
+        //================================================================================
+        // XML Helper
+        //================================================================================
 
         public Element encodeConnect(Document doc) {
             Element connectElement = doc.createElement("connect");

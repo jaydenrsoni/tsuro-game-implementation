@@ -4,13 +4,15 @@ import java.util.*;
 
 /**
  *
- * Created by vyasalwar on 4/16/18.
+ * Represents a single potential tile location on the board
+ *
  */
 public class BoardSpace {
 
     //================================================================================
     // Instance variables
     //================================================================================
+
     private Tile tile;
     private Map<Token, Integer> tokenSpaces;
     private int row;

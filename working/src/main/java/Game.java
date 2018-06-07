@@ -2,6 +2,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.*;
 
+/**
+ *
+ * Represents Tsuro game functionality at the highest level
+ *
+ */
 public class Game {
 
     //================================================================================
@@ -30,6 +35,7 @@ public class Game {
     //================================================================================
     // Instance Variables
     //================================================================================
+
     private Board board;
     private List<SPlayer> remainingPlayers;
     private List<SPlayer> eliminatedPlayers;
@@ -39,6 +45,7 @@ public class Game {
     //================================================================================
     // Getters
     //================================================================================
+
     public Board getBoard() {
         return board;
     }
@@ -58,6 +65,7 @@ public class Game {
     //================================================================================
     // Setters
     //================================================================================
+
     public void setTilePile(TilePile tilePile) {
         this.tilePile = tilePile;
     }
@@ -123,7 +131,7 @@ public class Game {
     }
 
     // Deal with when the player place the tile on the board
-    //   Returns a set of players who have lost after the tile is placed
+    // Returns a set of players who have lost after the tile is placed
     public Set<SPlayer> playTurn(Tile tile, SPlayer splayer) throws ContractException{
         if (!isLegalMove(tile, splayer)) {
             throw new ContractException(splayer.getName() + " has made an illegal move");

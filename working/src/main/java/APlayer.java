@@ -2,6 +2,12 @@ import javafx.util.Pair;
 
 import java.util.*;
 
+
+/**
+ *
+ * Abstract implementation of machine IPlayer
+ *
+ */
 public abstract class APlayer implements IPlayer {
 
     //================================================================================
@@ -15,6 +21,7 @@ public abstract class APlayer implements IPlayer {
     //================================================================================
     // Constructor
     //================================================================================
+
     public APlayer(String name){
         this.name = name;
     }
@@ -22,6 +29,7 @@ public abstract class APlayer implements IPlayer {
     //================================================================================
     // Getters
     //================================================================================
+
     public Color getColor() {
         return color;
     }
@@ -35,8 +43,9 @@ public abstract class APlayer implements IPlayer {
     }
 
     //================================================================================
-    // Public methods
+    // Public Methods
     //================================================================================
+
     public void initialize(Color playerColor, List<Color> otherPlayerColors){
         this.color = playerColor;
         this.otherPlayers = new ArrayList<>(otherPlayerColors);
@@ -46,20 +55,17 @@ public abstract class APlayer implements IPlayer {
         return getStartingLocation(board);
     }
 
-    abstract public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft);
-
     public void endGame(Board board, Set<Color> winningColors){
-        // Do something?
+        //System.out.println("Winning Colors: " + winningColors.toString());
     }
 
     //================================================================================
-    // Abstract methods
+    // Abstract Methods
     //================================================================================
-    abstract public Pair<BoardSpace, Integer> getStartingLocation(Board board);
 
-    //================================================================================
-    // Public Static Methods
-    //================================================================================
+    abstract public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft);
+
+    abstract public Pair<BoardSpace, Integer> getStartingLocation(Board board);
 
 
 }

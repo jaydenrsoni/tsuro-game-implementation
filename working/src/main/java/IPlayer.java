@@ -2,6 +2,11 @@ import javafx.util.Pair;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ * Interface to be implemented by any intelligent player (machine, human, or network)
+ *
+ */
 public interface IPlayer {
 
     String getName();

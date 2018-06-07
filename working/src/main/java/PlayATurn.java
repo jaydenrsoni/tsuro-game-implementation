@@ -14,9 +14,22 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ *
+ * Runs game.playTurn() a number of times using xml input (for use with ./test-play-a-turn)
+ *
+ */
 public class PlayATurn {
 
+    //================================================================================
+    // Instance Variable
+    //================================================================================
+
     private static DocumentBuilder docBuilder;
+
+    //================================================================================
+    // Main Method for ./test-play-a-turn
+    //================================================================================
 
     public static void main(String[] args) throws IOException, SAXException {
         Scanner scanner = new Scanner(System.in);
@@ -76,6 +89,10 @@ public class PlayATurn {
             printDoc(doc);
         }
     }
+
+    //================================================================================
+    // Private Helpers
+    //================================================================================
 
     private static void printDoc(Document doc) {
         NetworkAdapter.sendMessage(doc, new PrintWriter(System.out, true));

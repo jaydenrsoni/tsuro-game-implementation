@@ -29,8 +29,9 @@ import java.util.Set;
  *
  */
 public class NetworkAdapter {
+
     //================================================================================
-    // Public Final Static Variables
+    // Networking Variables
     //================================================================================
 
     public final static String HOSTNAME = "localhost";

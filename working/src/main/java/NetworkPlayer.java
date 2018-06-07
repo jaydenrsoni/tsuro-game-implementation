@@ -14,11 +14,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ * Connects a local IPlayer to a network tournament through client administrator thread
+ *
+ */
 public class NetworkPlayer implements IPlayer {
 
     //================================================================================
     // Instance Variables
     //================================================================================
+
     private DocumentBuilder docBuilder;
     private PrintWriter output;
     private BufferedReader input;
@@ -26,6 +32,7 @@ public class NetworkPlayer implements IPlayer {
     //================================================================================
     // Constructors
     //================================================================================
+
     public NetworkPlayer(Socket socket) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         try {
@@ -46,7 +53,7 @@ public class NetworkPlayer implements IPlayer {
     }
 
     //================================================================================
-    // Override Methods
+    // Public Methods
     //================================================================================
 
     @Override

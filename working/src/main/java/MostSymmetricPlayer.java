@@ -3,19 +3,22 @@ import javafx.util.Pair;
 import java.util.Random;
 
 /**
- * Created by vyasalwar on 4/30/18.
+ *
+ * IPlayer that always plays the most symmetric tile
+ *
  */
 public class MostSymmetricPlayer extends ScorePlayer {
+
     public MostSymmetricPlayer(String name) {
         super(name);
     }
 
-    // Get random starting location
+    @Override
     public Pair<BoardSpace, Integer> getStartingLocation(Board board) {
         return board.getRandomAvailableStartingLocation(new Random());
     }
 
-    // Order tiles from least to most symmetric, and choose the first legal rotation among them
+    // Order tiles from most to least symmetric, and choose the first legal rotation among them
     protected int ScoreTile(Tile tile){
         return tile.calculateSymmetries();
     }

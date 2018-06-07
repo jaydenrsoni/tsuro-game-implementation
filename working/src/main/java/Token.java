@@ -2,19 +2,23 @@ import javafx.util.Pair;
 import org.w3c.dom.*;
 
 /**
- * Created by vyasalwar on 4/16/18.
+ *
+ * Holds color and location data of a Tsuro pawn
+ *
  */
 public class Token {
 
     //================================================================================
     // Instance Variables
     //================================================================================
+
     private BoardSpace space;
     private Color color;
 
     //================================================================================
     // Constructor
     //================================================================================
+
     public Token(BoardSpace startingLocation, int startingTokenSpace, Color color){
         this.space = startingLocation;
         space.addToken(this, startingTokenSpace);
@@ -83,14 +87,11 @@ public class Token {
         throw new IllegalArgumentException("Invalid tokenSpace");
     }
 
+    //================================================================================
+    // XML Helper
+    //================================================================================
+
     public Element encodePawnLoc(Document doc) {
         return NetworkAdapter.encodePawnLoc(doc, space, getTokenSpace());
     }
-
-    //================================================================================
-    // Private helper methods
-    //================================================================================
-
-
-
 }

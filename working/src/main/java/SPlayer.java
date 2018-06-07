@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public class SPlayer {
+
     //================================================================================
     // Instance Variables
     //================================================================================
@@ -58,8 +59,30 @@ public class SPlayer {
     }
 
     //================================================================================
-    // IPlayer calls
+    // Getters
     //================================================================================
+
+    public Token getToken(){
+        return token;
+    }
+
+    public Color getColor() { return this.color; }
+
+    public Tile getTile(int i){
+        if (0 <= i && i < 3) {
+            if (i > hand.size() - 1)
+                return null;
+
+            return hand.get(i);
+        }
+        else
+            throw new IndexOutOfBoundsException("Illegal Hand Access");
+    }
+
+    //================================================================================
+    // Public Methods that call IPlayer functions
+    //================================================================================
+
     public String getName() {
         return iplayer.getName();
     }
@@ -108,28 +131,7 @@ public class SPlayer {
     }
 
     //================================================================================
-    // Getters
-    //================================================================================
-
-    public Token getToken(){
-        return token;
-    }
-
-    public Color getColor() { return this.color; }
-
-    public Tile getTile(int i){
-        if (0 <= i && i < 3) {
-            if (i > hand.size() - 1)
-                return null;
-
-            return hand.get(i);
-        }
-        else
-            throw new IndexOutOfBoundsException("Illegal Hand Access");
-    }
-
-    //================================================================================
-    // Public Methods
+    // Other Public Methods
     //================================================================================
 
     public boolean holdsTile(Tile tile){

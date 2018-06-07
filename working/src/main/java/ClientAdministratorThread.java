@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ * Connects local IPlayer to remote tournament
+ *
+ */
 public class ClientAdministratorThread extends Thread {
 
     //================================================================================
@@ -47,7 +52,7 @@ public class ClientAdministratorThread extends Thread {
     }
 
     //================================================================================
-    // Override Methods
+    // Public Method
     //================================================================================
 
     @Override
@@ -112,6 +117,16 @@ public class ClientAdministratorThread extends Thread {
     }
 
     //================================================================================
+    // Main Method for ./tournament
+    //================================================================================
+
+    public static void main(String[] args) {
+        IPlayer player = new RandomPlayer(args[0]);
+        ClientAdministratorThread playerAdmin = new ClientAdministratorThread(player);
+        playerAdmin.start();
+    }
+
+    //================================================================================
     // Private Helpers
     //================================================================================
 
@@ -158,12 +173,5 @@ public class ClientAdministratorThread extends Thread {
         iplayer.endGame(board, winners);
 
         return NetworkAdapter.encodeVoid(responseDocument);
-    }
-
-
-    public static void main(String[] args) {
-        IPlayer player = new RandomPlayer(args[0]);
-        ClientAdministratorThread playerAdmin = new ClientAdministratorThread(player);
-        playerAdmin.start();
     }
 }

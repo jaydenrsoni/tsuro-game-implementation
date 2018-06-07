@@ -6,19 +6,18 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  *
  * Represents a Tsuro Board
  *
- * Created by vyasalwar on 4/16/18.
  */
 public class Board {
+
     //================================================================================
     // Instance Variables
     //================================================================================
+
     private BoardSpace[][] spaces;
     private final static int BOARD_LENGTH = 6;
     private final static int NUMBER_TOKEN_POSITIONS = 8;
@@ -26,6 +25,7 @@ public class Board {
     //================================================================================
     // Constructors
     //================================================================================
+
     public Board() {
         initializeSpaces();
     }
@@ -49,6 +49,7 @@ public class Board {
     //================================================================================
     // Getters
     //================================================================================
+
     public BoardSpace getBoardSpace(int row, int col) {
         if (isInvalidCoordinate(row, col))
             throw new IllegalArgumentException("Invalid Tile Access");
@@ -57,8 +58,9 @@ public class Board {
     }
 
     //================================================================================
-    // Public methods
+    // Public Methods
     //================================================================================
+
     // Returns true if there is a tile on the row and col
     public boolean isOccupied(int row, int col) {
         return getBoardSpace(row, col).hasTile();
@@ -171,6 +173,7 @@ public class Board {
     //================================================================================
     // Private Helpers
     //================================================================================
+
     private void initializeSpaces() {
         this.spaces = new BoardSpace[BOARD_LENGTH][BOARD_LENGTH];
         for (int i = 0; i < BOARD_LENGTH; i++) {
@@ -246,6 +249,7 @@ public class Board {
     //================================================================================
     // XML Helpers
     //================================================================================
+
     public Element encodeBoard(Document doc) {
         Element boardElement = doc.createElement("board");
         Element tilesNode = encodeTiles(doc);
@@ -348,6 +352,7 @@ public class Board {
     //================================================================================
     // Static Functions
     //================================================================================
+
     // Returns true if the row and col pair are a valid address in the board
     public static boolean isInvalidCoordinate(int row, int col) {
         return (row < 0 || row >= BOARD_LENGTH) || (col < 0 || col >= BOARD_LENGTH);

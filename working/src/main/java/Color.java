@@ -4,7 +4,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 /**
- * Created by vyasalwar on 4/27/18.
+ *
+ * Represents token colors
+ *
  */
 public enum Color {
     BLUE,
@@ -15,6 +17,10 @@ public enum Color {
     HOTPINK,
     DARKGREEN,
     PURPLE;
+
+    //================================================================================
+    // XML Helpers
+    //================================================================================
 
     public Element encodeColor(Document doc) {
         Element colorElement = doc.createElement("color");
