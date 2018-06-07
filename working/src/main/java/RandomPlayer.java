@@ -31,8 +31,8 @@ public class RandomPlayer extends APlayer {
     //================================================================================
     // Override methods
     //================================================================================
-    public Pair<BoardSpace, Integer> getStartingLocation(){
-        return getRandomStartingLocation(random);
+    public Pair<BoardSpace, Integer> getStartingLocation(Board board){
+        return board.getRandomAvailableStartingLocation(random);
     }
 
     @Override

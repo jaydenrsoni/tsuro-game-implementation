@@ -105,7 +105,7 @@ public class Game {
         if(!splayer.holdsTile(tile))
             return false;
 
-        if(splayer.hasSafeMove() && board.willKillPlayer(tile, splayer))
+        if(splayer.hasSafeMove(board) && board.willKillPlayer(tile, splayer))
             return false;
 
         return true;
@@ -126,8 +126,7 @@ public class Game {
     //   Returns a set of players who have lost after the tile is placed
     public Set<SPlayer> playTurn(Tile tile, SPlayer splayer) throws ContractException{
         if (!isLegalMove(tile, splayer)) {
-            blamePlayer(splayer);
-            return new HashSet<>();
+            throw new ContractException(splayer.getName() + " has made an illegal move");
         }
 
         splayer.removeTileFromHand(tile);
@@ -172,7 +171,8 @@ public class Game {
 
 
     // Main game loop
-    public Set<Color> playGame(){
+    public Set<Color> playGame(int numberOfRemotePlayers){
+        connectRemotePlayers(numberOfRemotePlayers);
         initializePlayers();
 
         for (SPlayer splayer: remainingPlayers) {
@@ -190,11 +190,7 @@ public class Game {
             }
             catch (ContractException e) {
                 blamePlayer(splayer);
-                continue;
             }
-
-//            if (remainingPlayers.get(i).equals(splayer))
-//                i = (i + 1) % remainingPlayers.size();
         }
 
         Set<Color> winningColors = new HashSet<>();
@@ -212,25 +208,23 @@ public class Game {
         return winningColors;
     }
 
-    public Set<Color> playNetworkedGame() {
+    //================================================================================
+    // Private Helpers
+    //================================================================================
+
+    private void connectRemotePlayers(int numberOfRemotePlayers) {
         try {
             ServerSocket serverSocket = new ServerSocket(NetworkAdapter.PORTNUMBER);
-            while (remainingPlayers.size() < 2) { //can be changed to change the number of players in the game
+            while (remainingPlayers.size() < numberOfRemotePlayers) { //can be changed to change the number of players in the game
                 SPlayer splayer = new SPlayer(new NetworkPlayer(serverSocket.accept()), tilePile);
                 remainingPlayers.add(splayer);
                 System.out.println("connected server to " + splayer.getName());
             }
+            serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return playGame();
     }
-
-
-    //================================================================================
-    // Private Helpers
-    //================================================================================
 
     private void initializePlayers(){
         List<Color> startingColorList = new ArrayList<>();
@@ -247,7 +241,7 @@ public class Game {
 
     private void dragonPlayerDrawTileLoop() {
         //if there are tiles in the pile and if someone has dragon tile
-        while((dragonTileOwner != null) && (!tilePile.isEmpty())){
+        while(dragonTileOwner != null && !tilePile.isEmpty()) {
             //person w/ dragon tile draws
             dragonTileOwner.drawFromPile();
 

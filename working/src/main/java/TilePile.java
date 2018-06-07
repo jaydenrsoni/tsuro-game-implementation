@@ -16,11 +16,11 @@ import java.util.*;
  */
 public class TilePile {
 
-    final private String DEFAULT_FILE_PATH = "../../../tiles.txt";
+    final private String DEFAULT_FILE_PATH = "tiles.txt";
 
     public TilePile(){
         tiles = new LinkedList<>();
-        //fillTiles(DEFAULT_FILE_PATH);
+        fillTiles(DEFAULT_FILE_PATH);
     }
 
     public TilePile(String filename){
@@ -54,7 +54,7 @@ public class TilePile {
     }
 
     public void shuffleDeck(){
-        List<Tile> tileList = new ArrayList<Tile>(tiles);
+        List<Tile> tileList = new ArrayList<>(tiles);
         Collections.shuffle(tileList);
         tiles = new LinkedList<>(tileList);
     }

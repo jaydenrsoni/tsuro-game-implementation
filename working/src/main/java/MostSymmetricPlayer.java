@@ -11,8 +11,8 @@ public class MostSymmetricPlayer extends ScorePlayer {
     }
 
     // Get random starting location
-    public Pair<BoardSpace, Integer> getStartingLocation() {
-        return getRandomStartingLocation(new Random());
+    public Pair<BoardSpace, Integer> getStartingLocation(Board board) {
+        return board.getRandomAvailableStartingLocation(new Random());
     }
 
     // Order tiles from least to most symmetric, and choose the first legal rotation among them

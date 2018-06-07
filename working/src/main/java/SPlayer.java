@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 public class SPlayer {
+    //================================================================================
+    // Instance Variables
+    //================================================================================
 
     private final int MAX_TILES_IN_BANK = 3;
 
@@ -20,6 +23,10 @@ public class SPlayer {
     private IPlayer iplayer;
     private Color color;
     private List<Color> otherPlayerColors;
+
+    //================================================================================
+    // Constructors
+    //================================================================================
 
     public SPlayer(IPlayer iplayer, TilePile tilePile){
         this.iplayer = iplayer;
@@ -37,7 +44,6 @@ public class SPlayer {
     public SPlayer(Node splayerNode, TilePile tilePile, Board board){
         if (splayerNode.getNodeName().equals("splayer-dragon")) {
             requestDragonTile();
-            //System.err.println("dragon player parsed");
         }
         NodeList splayerNodeChildren = splayerNode.getChildNodes();
         this.color = Color.decodeColor(splayerNodeChildren.item(0));
@@ -52,16 +58,11 @@ public class SPlayer {
     }
 
     //================================================================================
-    // APlayer calls
+    // IPlayer calls
     //================================================================================
     public String getName() {
         return iplayer.getName();
     }
-
-    public void decodeAddToken(Board board, Color color, Node pawnLocNode) {
-        token = new Token(board, color, pawnLocNode);
-    }
-
 
     public void initializeSPlayer(Color playerColor, List<Color> otherPlayerColors){
         if (curState != State.GAMEENDED)
@@ -92,7 +93,7 @@ public class SPlayer {
     }
 
     public Tile chooseTile(Board board){
-        if (curState != State.TURNPLAYABLE || !isValidHand())
+        if (curState != State.TURNPLAYABLE || !hasValidHand(board))
             throw new ContractException();
 
         return iplayer.playTurn(board, hand, tilePile.size());
@@ -106,13 +107,15 @@ public class SPlayer {
         curState = State.GAMEENDED;
     }
 
+    //================================================================================
+    // Getters
+    //================================================================================
 
     public Token getToken(){
         return token;
     }
 
     public Color getColor() { return this.color; }
-
 
     public Tile getTile(int i){
         if (0 <= i && i < 3) {
@@ -124,6 +127,10 @@ public class SPlayer {
         else
             throw new IndexOutOfBoundsException("Illegal Hand Access");
     }
+
+    //================================================================================
+    // Public Methods
+    //================================================================================
 
     public boolean holdsTile(Tile tile){
         return hand.contains(tile);
@@ -166,44 +173,30 @@ public class SPlayer {
         hand = new ArrayList<>();
     }
 
-    public boolean isSafeMove(Tile tile){
-        return !Game.getGame().getBoard().willKillPlayer(tile, this);
+    public boolean hasSafeMove(Board board){
+        return board.hasSafeMove(hand, token);
     }
 
-    public boolean hasSafeMove(){
-        for (Tile tile: hand){
-
-            Tile copy = new Tile(tile);
-            for (int i = 0; i < 4; i++){
-                copy.rotateClockwise();
-                if (isSafeMove(copy))
-                    return true;
-            }
-        }
-        return false;
+    public void replaceWithRandom(){
+        iplayer = new RandomPlayer(color.toString() + " replacement");
+        iplayer.initialize(color, otherPlayerColors);
     }
 
-    public Set<Tile> getLegalMoves(){
-        Set<Tile> legalMoves = new HashSet<>();
-        boolean hasSafeMoves = hasSafeMove();
+    //================================================================================
+    // Private Helpers
+    //================================================================================
 
-        for (Tile tile: hand){
-            for (int rotation = 0; rotation < 4; rotation++){
-                if (!hasSafeMoves || isSafeMove(tile))
-                    legalMoves.add(new Tile (tile));
-                tile.rotateClockwise();
-            }
-        }
-
-        return legalMoves;
+    private void requestDragonTile(){
+        Game game = Game.getGame();
+        game.requestDragonTile(this);
     }
 
-    public boolean isValidHand(){
+    private boolean hasValidHand(Board board){
         if (hand.size() > 3)
             return false;
 
         for (Tile tile: hand){
-            if (Game.getGame().getBoard().findLocationOfTile(tile) != null)
+            if (board.findLocationOfTile(tile) != null)
                 return false;
         }
 
@@ -217,10 +210,9 @@ public class SPlayer {
         return true;
     }
 
-    public void replaceWithRandom(){
-        iplayer = new RandomPlayer(color.toString() + " replacement");
-        iplayer.initialize(color, otherPlayerColors);
-    }
+    //================================================================================
+    // XML Helpers
+    //================================================================================
 
     public Element encodeSPlayer(Document doc){
         Element splayerElement = encodeSPlayerTagName(doc);
@@ -234,14 +226,6 @@ public class SPlayer {
         return splayerElement;
     }
 
-    //================================================================================
-    // Private methods
-    //================================================================================
-    private void requestDragonTile(){
-        Game game = Game.getGame();
-        game.requestDragonTile(this);
-    }
-
     private Element encodeSPlayerTagName(Document doc){
         if(Game.getGame().hasDragonTile(this)){
             return doc.createElement("splayer-dragon");
@@ -250,6 +234,7 @@ public class SPlayer {
             return doc.createElement("splayer-nodragon");
         }
     }
+
 
     //================================================================================
     // Sequential Contract

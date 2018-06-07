@@ -67,7 +67,6 @@ public class GameTest {
     @Test
     public void isLegalMoveFalseWithOtherMove() {
 
-
         Tile testTileCantMove = new Tile(0, 1, 2, 3, 4, 5, 6, 7);
         Tile testTileCanMove = new Tile(0, 2, 1, 3, 4, 5, 6, 7);
 
@@ -139,22 +138,14 @@ public class GameTest {
         Assert.assertEquals(vyasSplayer.getToken().getBoardSpace(), spaceOne);
     }
 
-    @Ignore
     @Test
     public void dragonTileWithNoneDrawnTest() {
-
-
         Tile testTile = new Tile(0, 1, 2, 3, 4, 5, 6, 7);
 
         when(tilePileMock.drawFromDeck())
-                .thenReturn(testTile, testTile, null)
-                .thenReturn(testTile, testTile, null)
-                .thenReturn(testTile, testTile, null)
-                .thenReturn(testTile, testTile, null)
-                .thenReturn(null)
                 .thenReturn(testTile);
         when(tilePileMock.isEmpty())
-                .thenReturn(false, false, true)
+                .thenReturn(false, false, true, true)
                 .thenReturn(false, false, true)
                 .thenReturn(false, false, true)
                 .thenReturn(false, false, true)
@@ -180,11 +171,14 @@ public class GameTest {
         christosSplayer.initializeSPlayer(Color.ORANGE, new ArrayList<>());
         christosSplayer.placeToken(spaceTwo, 5);
 
+
         Assert.assertEquals(game.playTurn(testTile, vyasSplayer).size(), 2);
         Assert.assertTrue(robbySplayer.hasFullHand());
         Assert.assertTrue(christosSplayer.hasFullHand());
 
-        verify(tilePileMock, times(14)).drawFromDeck();
+        verify(tilePileMock, times(17)).isEmpty();
+        verify(tilePileMock, times(10)).drawFromDeck();
+
     }
 
 }
