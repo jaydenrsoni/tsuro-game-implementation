@@ -34,7 +34,7 @@ public class NetworkAdapter {
     //================================================================================
 
     public final static String HOSTNAME = "localhost";
-    public final static int PORTNUMBER = 4000;
+    public final static int PORTNUMBER = 12345;
     public final static SocketAddress SOCKETADDRESS = new InetSocketAddress(HOSTNAME, PORTNUMBER);
 
     //================================================================================

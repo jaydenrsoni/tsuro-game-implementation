@@ -8,8 +8,6 @@ import java.util.*;
  */
 public class BoardSpace {
 
-    private final int NUM_SPACES = 8;
-
     //================================================================================
     // Instance variables
     //================================================================================
@@ -78,6 +76,10 @@ public class BoardSpace {
 
     public boolean hasToken() {
         return !tokenSpaces.isEmpty();
+    }
+
+    public boolean hasTokenAtPosition(int tokenPosition){
+        return tokenSpaces.values().contains(tokenPosition);
     }
 
     // Move all tokens on the tile to their opposite endpoints

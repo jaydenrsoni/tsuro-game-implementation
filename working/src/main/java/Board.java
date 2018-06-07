@@ -21,6 +21,7 @@ public class Board {
     //================================================================================
     private BoardSpace[][] spaces;
     private final static int BOARD_LENGTH = 6;
+    private final static int NUMBER_TOKEN_POSITIONS = 8;
 
     //================================================================================
     // Constructors
@@ -148,62 +149,23 @@ public class Board {
         throw new IllegalArgumentException("Color provided is not playing the game dead or alive");
     }
 
-    private Integer convertEdgeLocationToInteger(int row, int col, int tokenSpace){
-        if(!isOnEdge(row, col, tokenSpace))
-            throw new IllegalArgumentException("Given location is not on the edge of the board");
-
-        int edgeNumber = tokenSpace / 2;
-        boolean topEdge    = row == 0 && edgeNumber == 0;
-        boolean bottomEdge = row == 5 && edgeNumber == 2;
-        int indexOfEdge = (topEdge || bottomEdge) ? col : row;
-        int leftOrRightTokenSpace = tokenSpace % 2;
-
-        int edgeLocationInt = edgeNumber * 12;
-        edgeLocationInt += indexOfEdge * 2;
-        edgeLocationInt += leftOrRightTokenSpace;
-
-        return edgeLocationInt;
-    }
-
-    private Pair<BoardSpace, Integer> convertIntegerToEdgeLocation(int edgeLocation){
-        int edgeNumber = edgeLocation / 12;
-        int indexOfEdge = edgeLocation / 2 % 6;
-        int leftOrRightTokenSpace = edgeLocation % 2;
-
-        int tokenSpace = edgeNumber * 2 + leftOrRightTokenSpace;
-
-        if(edgeNumber == 0){
-            return new Pair<>(getBoardSpace(0, indexOfEdge), tokenSpace);
-        }
-        else if (edgeNumber == 1){
-            return new Pair<>(getBoardSpace(indexOfEdge, 5), tokenSpace);
-        }
-        else if (edgeNumber == 2){
-            return new Pair<>(getBoardSpace(5, indexOfEdge), tokenSpace);
-        }
-        else{
-            return new Pair<>(getBoardSpace(indexOfEdge, 0), tokenSpace);
-        }
-    }
-
     public Pair<BoardSpace, Integer> getRandomAvailableStartingLocation(Random random){
-        List<Integer> validEdgeLocations = IntStream.rangeClosed(0, 42)
-                .boxed().collect(Collectors.toList());
+        List<Pair<BoardSpace, Integer>> availableStartingLocations = new ArrayList<>();
 
         for (int row = 0; row < BOARD_LENGTH; row++){
             for (int col = 0; col < BOARD_LENGTH; col++){
-                BoardSpace boardSpace = getBoardSpace(row, col);
-                Set<Integer> tokenSpacesWithTokens = boardSpace.getTokenSpacesWithTokens();
-                for(int tokenSpace : tokenSpacesWithTokens){
-                    if (isOnEdge(boardSpace.getRow(), boardSpace.getCol(), tokenSpace)){
-                        validEdgeLocations.remove(convertEdgeLocationToInteger(boardSpace.getRow(), boardSpace.getCol(), tokenSpace));
+                for(int tokenSpace = 0; tokenSpace < NUMBER_TOKEN_POSITIONS; tokenSpace++){
+                    BoardSpace boardSpace = getBoardSpace(row, col);
+
+                    if(isOnEdge(row, col, tokenSpace) && !boardSpace.hasTokenAtPosition(tokenSpace)) {
+                        availableStartingLocations.add(new Pair<BoardSpace, Integer>(boardSpace, tokenSpace));
                     }
                 }
             }
         }
 
-        int edgeLocation = validEdgeLocations.get(random.nextInt(validEdgeLocations.size()));
-        return convertIntegerToEdgeLocation(edgeLocation);
+        int startingLocationIndex = random.nextInt(availableStartingLocations.size());
+        return availableStartingLocations.get(startingLocationIndex);
     }
 
     //================================================================================

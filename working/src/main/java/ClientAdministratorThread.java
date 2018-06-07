@@ -159,4 +159,15 @@ public class ClientAdministratorThread extends Thread {
 
         return NetworkAdapter.encodeVoid(responseDocument);
     }
+
+
+    public static void main(String[] args)  {
+        IPlayer keith = new RandomPlayer("keith");
+        ClientAdministratorThread keithAdmin = new ClientAdministratorThread(keith);
+        keithAdmin.start();
+
+        IPlayer jayden = new RandomPlayer("jayden");
+        ClientAdministratorThread jaydenAdmin = new ClientAdministratorThread(jayden);
+        jaydenAdmin.start();
+    }
 }
