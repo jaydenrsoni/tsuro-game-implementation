@@ -50,7 +50,10 @@ public class PlayATurn {
             Node boardNode = parseNextNode(scanner);
             Node playTileNode = parseNextNode(scanner);
 
+            //set tile pile first to deal with dragon tile handling
             TilePile tilePile = new TilePile(tileListNode);
+            game.setTilePile(tilePile);
+
             Board board = new Board(boardNode);
             List<SPlayer> remPlayers = NetworkAdapter.decodeListOfSPlayers(remPlayerListNode, tilePile, board);
             List<SPlayer> elimPlayers = NetworkAdapter.decodeListOfSPlayers(elimPlayerListNode, tilePile, board);
