@@ -71,11 +71,10 @@ public class Game {
     }
 
     public void setFromPlayATurnInput(Board board, List<SPlayer> remainingPlayers,
-                                      List<SPlayer> eliminatedPlayers, TilePile tilePile) {
+                                      List<SPlayer> eliminatedPlayers) {
         this.board = board;
         this.remainingPlayers = remainingPlayers;
         this.eliminatedPlayers = eliminatedPlayers;
-        this.tilePile = tilePile;
     }
 
     //================================================================================

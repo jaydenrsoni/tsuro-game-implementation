@@ -63,7 +63,7 @@ public class PlayATurn {
             remPlayers.get(0).addTileToHand(playTile);
 
             //dragon tile ownership in game is established when remaining players are created
-            game.setFromPlayATurnInput(board, remPlayers, elimPlayers, tilePile);
+            game.setFromPlayATurnInput(board, remPlayers, elimPlayers);
 
             Set<SPlayer> losingPlayers = game.playTurn(playTile, remPlayers.get(0));
 
