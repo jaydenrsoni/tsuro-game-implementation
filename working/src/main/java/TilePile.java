@@ -20,7 +20,7 @@ public class TilePile {
     // Text file with all Tsuro tiles
     //================================================================================
 
-    final private String DEFAULT_FILE_PATH = "tiles.txt";
+    final private String DEFAULT_FILE_PATH = "../../../tiles.txt";
 
     //================================================================================
     // Instance Variable
