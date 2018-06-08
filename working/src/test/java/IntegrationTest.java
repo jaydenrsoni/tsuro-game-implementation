@@ -66,6 +66,7 @@ public class IntegrationTest {
         Assert.assertFalse(winners.isEmpty());
     }
 
+    @Ignore
     @Test
     public void playNetworkedGameMaxPlayersTest() {
         IPlayer keith = new RandomPlayer("keith");
