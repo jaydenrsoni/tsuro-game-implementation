@@ -51,6 +51,7 @@ public class IntegrationTest {
         }
     }
 
+    @Ignore
     @Test
     public void playNetworkedGameMinPlayersTest() {
         IPlayer keith = new RandomPlayer("keith");

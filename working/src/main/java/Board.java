@@ -152,19 +152,29 @@ public class Board {
     }
 
     public Pair<BoardSpace, Integer> getRandomAvailableStartingLocation(Random random){
-        List<Pair<BoardSpace, Integer>> availableStartingLocations = new ArrayList<>();
+        List<Pair<BoardSpace, Integer>> availableStartingLocations = findAvailableStartingLocations();
 
-        for (int row = 0; row < BOARD_LENGTH; row++){
-            for (int col = 0; col < BOARD_LENGTH; col++){
-                for(int tokenSpace = 0; tokenSpace < NUMBER_TOKEN_POSITIONS; tokenSpace++){
-                    BoardSpace boardSpace = getBoardSpace(row, col);
+        int startingLocationIndex = random.nextInt(availableStartingLocations.size());
+        return availableStartingLocations.get(startingLocationIndex);
+    }
 
-                    if(isOnEdge(row, col, tokenSpace) && !boardSpace.hasTokenAtPosition(tokenSpace)) {
-                        availableStartingLocations.add(new Pair<BoardSpace, Integer>(boardSpace, tokenSpace));
-                    }
-                }
-            }
+    public Pair<BoardSpace, Integer> getIntelligentAvailableStartingLocation(Random random){
+        List<Pair<BoardSpace, Integer>> availableStartingLocations = findAvailableStartingLocations();
+        Set<Pair<BoardSpace, Integer>> badStartingLocations = new HashSet<>();
+
+        for (Pair<BoardSpace, Integer> location: availableStartingLocations) {
+            BoardSpace space = location.getKey();
+
+            // avoid squares that already have tokens placed
+            if (space.hasToken())
+                badStartingLocations.add(location);
+
+            //avoid corners
+            if (space.getCol() == space.getRow() && space.getRow() % 5 == 0)
+                badStartingLocations.add(location);
         }
+
+        availableStartingLocations.removeAll(badStartingLocations);
 
         int startingLocationIndex = random.nextInt(availableStartingLocations.size());
         return availableStartingLocations.get(startingLocationIndex);
@@ -244,6 +254,24 @@ public class Board {
             transferToken(token);
             curSpace = token.getBoardSpace();
         }
+    }
+
+    public List<Pair<BoardSpace, Integer>> findAvailableStartingLocations(){
+        List<Pair<BoardSpace, Integer>> availableStartingLocations = new ArrayList<>();
+
+        for (int row = 0; row < BOARD_LENGTH; row++){
+            for (int col = 0; col < BOARD_LENGTH; col++){
+                for(int tokenSpace = 0; tokenSpace < NUMBER_TOKEN_POSITIONS; tokenSpace++){
+                    BoardSpace boardSpace = getBoardSpace(row, col);
+
+                    if(isOnEdge(row, col, tokenSpace) && !boardSpace.hasTokenAtPosition(tokenSpace)) {
+                        availableStartingLocations.add(new Pair<BoardSpace, Integer>(boardSpace, tokenSpace));
+                    }
+                }
+            }
+        }
+
+        return availableStartingLocations;
     }
 
     //================================================================================

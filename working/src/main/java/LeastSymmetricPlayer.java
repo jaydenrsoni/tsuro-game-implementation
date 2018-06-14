@@ -20,7 +20,7 @@ public class LeastSymmetricPlayer extends ScorePlayer {
     }
 
     // Order tiles from least to most symmetric, and choose the first legal rotation among them
-    protected int ScoreTile(Tile tile){
+    protected double ScoreTile(Tile tile, Board board){
         return -tile.calculateSymmetries();
     }
 

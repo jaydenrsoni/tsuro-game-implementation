@@ -16,10 +16,10 @@ public abstract class ScorePlayer extends APlayer {
     public Tile playTurn(Board board, List<Tile> hand, int numberTilesLeft){
         List<Tile> legalMoves = board.findLegalMovesForPlayer(hand, getColor());
         Tile bestTile = null;
-        int bestScore = Integer.MIN_VALUE;
+        double bestScore = -Double.MAX_VALUE;
 
         for (Tile tile: legalMoves){
-            int curScore = ScoreTile(tile);
+            double curScore = ScoreTile(tile, board);
             if (curScore > bestScore){
                 bestScore = curScore;
                 bestTile = tile;
@@ -29,5 +29,5 @@ public abstract class ScorePlayer extends APlayer {
         return bestTile;
     }
 
-    abstract protected int ScoreTile(Tile tile);
+    abstract protected double ScoreTile(Tile tile, Board board);
 }

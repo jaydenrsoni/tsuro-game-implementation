@@ -49,18 +49,18 @@ public class TileTest {
         Tile tile2 = new Tile(0, 4, 1, 5, 2, 3, 6, 7);
         Tile tile3 = new Tile(0, 4, 1, 2, 3, 5, 6, 7);
 
-        Assert.assertEquals(tile1.calculateSymmetries(), 4);
-        Assert.assertEquals(tile2.calculateSymmetries(), 2);
-        Assert.assertEquals(tile3.calculateSymmetries(), 1);
+        Assert.assertEquals(tile1.calculateSymmetries(), 1, 0);
+        Assert.assertEquals(tile2.calculateSymmetries(), .5, 0);
+        Assert.assertEquals(tile3.calculateSymmetries(), .25, 0);
 
         // Rotations shouldn't affect symmetries
         tile1.rotateClockwise();
         tile2.rotateClockwise();
         tile3.rotateClockwise();
 
-        Assert.assertEquals(tile1.calculateSymmetries(), 4);
-        Assert.assertEquals(tile2.calculateSymmetries(), 2);
-        Assert.assertEquals(tile3.calculateSymmetries(), 1);
+        Assert.assertEquals(tile1.calculateSymmetries(), 1, 0);
+        Assert.assertEquals(tile2.calculateSymmetries(), .5, 0);
+        Assert.assertEquals(tile3.calculateSymmetries(), .25, 0);
     }
 
     @Test

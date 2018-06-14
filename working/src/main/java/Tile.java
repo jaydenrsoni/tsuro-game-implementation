@@ -4,8 +4,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -104,17 +107,20 @@ public class Tile {
         throw new IllegalArgumentException("Endpoint must be between 0 and 7");
     }
 
-    public int calculateSymmetries(){
+    public double calculateSymmetries(){
         Tile copy = new Tile(this);
-        int symmetries = 0;
+        Set<Set> uniqueTileConnections = new HashSet<>();
 
         for (int i = 0; i < 4; i++){
-            if (connections.equals(copy.connections)){
-                symmetries++;
-            }
+            uniqueTileConnections.add(copy.connections);
             copy.rotateClockwise();
         }
-        return symmetries;
+
+        return 1.0/uniqueTileConnections.size();
+    }
+
+    public int calculateDefeatedOpponents(Board board) {
+        return 0;
     }
 
     @Override

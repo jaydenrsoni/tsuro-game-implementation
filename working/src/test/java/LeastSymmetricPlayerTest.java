@@ -134,7 +134,7 @@ public class LeastSymmetricPlayerTest {
         Tile tile = splayer.chooseTile(board);
         Assert.assertFalse(board.willKillPlayer(tile, splayer));
         Assert.assertEquals(tile, new Tile(0, 4, 1, 2, 3, 5, 6, 7));
-        Assert.assertEquals(tile.calculateSymmetries(), 1);
+        Assert.assertEquals(tile.calculateSymmetries(), .25, 0);
     }
 
 }

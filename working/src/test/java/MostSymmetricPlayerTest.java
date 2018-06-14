@@ -127,7 +127,7 @@ public class MostSymmetricPlayerTest {
         Tile tile = splayer.chooseTile(board);
         Assert.assertFalse(board.willKillPlayer(tile, splayer));
         Assert.assertEquals(tile, new Tile(0, 5, 1, 4, 2, 7, 3, 6));
-        Assert.assertEquals(tile.calculateSymmetries(), 4);
+        Assert.assertEquals(tile.calculateSymmetries(), 1, 0);
     }
 
 }
