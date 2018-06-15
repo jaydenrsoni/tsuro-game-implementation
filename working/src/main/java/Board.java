@@ -190,7 +190,6 @@ public class Board {
         BoardSpace currSpace = playerToken.getBoardSpace();
         Set<Token> tokensOnSpace = currSpace.getTokensOnSpace();
 
-        // assume player will not be killed (or play tile doesn't matter) since this is a legal play
         int defeatedOpponents = 0;
         for (Token token: tokensOnSpace) {
             if (willKillToken(tile, token)) {
