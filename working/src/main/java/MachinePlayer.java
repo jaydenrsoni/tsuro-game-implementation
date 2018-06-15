@@ -21,7 +21,7 @@ public class MachinePlayer extends ScorePlayer {
     // Order tiles from most to least symmetric, and choose the first legal rotation among them
     protected double ScoreTile(Tile tile, Board board){
         double symmetryScore = tile.calculateSymmetries(); // between 1/4 and 1
-        int numberDefeatedOpponents = tile.calculateDefeatedOpponents(board); // between 0 and numRemPlayers
+        int numberDefeatedOpponents = board.calculateDefeatedOpponents(this, tile); // between 0 and numRemPlayers
 
         // some linear combination of a number of scores
         return symmetryScore + numberDefeatedOpponents;

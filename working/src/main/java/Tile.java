@@ -119,10 +119,6 @@ public class Tile {
         return 1.0/uniqueTileConnections.size();
     }
 
-    public int calculateDefeatedOpponents(Board board) {
-        return 0;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Tile) {

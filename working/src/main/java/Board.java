@@ -180,6 +180,22 @@ public class Board {
         return availableStartingLocations.get(startingLocationIndex);
     }
 
+    public int calculateDefeatedOpponents(ScorePlayer player, Tile tile) {
+        Token playerToken = findTokenFromColor(player.getColor());
+        BoardSpace currSpace = playerToken.getBoardSpace();
+        Set<Token> tokensOnSpace = currSpace.getTokensOnSpace();
+
+        // assume player will not be killed (or play tile doesn't matter) since this is a legal play
+        int defeatedOpponents = 0;
+        for (Token token: tokensOnSpace) {
+            if (willKillToken(tile, token)) {
+                defeatedOpponents++;
+            }
+        }
+
+        return defeatedOpponents;
+    }
+
     //================================================================================
     // Private Helpers
     //================================================================================
@@ -256,7 +272,7 @@ public class Board {
         }
     }
 
-    public List<Pair<BoardSpace, Integer>> findAvailableStartingLocations(){
+    private List<Pair<BoardSpace, Integer>> findAvailableStartingLocations(){
         List<Pair<BoardSpace, Integer>> availableStartingLocations = new ArrayList<>();
 
         for (int row = 0; row < BOARD_LENGTH; row++){

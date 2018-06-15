@@ -121,7 +121,7 @@ public class ClientAdministratorThread extends Thread {
     //================================================================================
 
     public static void main(String[] args) {
-        IPlayer player = new RandomPlayer(args[0]);
+        IPlayer player = new MachinePlayer(args[0]);
         ClientAdministratorThread playerAdmin = new ClientAdministratorThread(player);
         playerAdmin.start();
     }
