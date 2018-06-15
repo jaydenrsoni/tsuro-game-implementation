@@ -176,6 +176,11 @@ public class Board {
 
         availableStartingLocations.removeAll(badStartingLocations);
 
+        // in case game is played with more than regular number of players, fail-safe to avoid cheating
+        if (availableStartingLocations.isEmpty()) {
+            return getRandomAvailableStartingLocation(random);
+        }
+
         int startingLocationIndex = random.nextInt(availableStartingLocations.size());
         return availableStartingLocations.get(startingLocationIndex);
     }
