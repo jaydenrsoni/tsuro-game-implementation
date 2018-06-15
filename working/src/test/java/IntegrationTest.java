@@ -3,6 +3,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 public class IntegrationTest {
@@ -28,27 +29,47 @@ public class IntegrationTest {
 
     @Test
     public void playManyGamesTest() {
-        for(int seed = 0; seed < 100; seed++){
+        int blueWins = 0;
+        int redWins = 0;
+        int greenWins = 0;
+
+        for(int seed = 0; seed < 10000; seed++){
             try {
                 Game.resetGame();
                 game = Game.getGame();
                 game.getTilePile().shuffleDeck(seed);
 
-                IPlayer vyas = new RandomPlayer("Vyas", seed);
-                IPlayer keith = new RandomPlayer("Keith", seed);
-                IPlayer robby = new RandomPlayer("Robby", seed);
+                IPlayer vyas = new RandomPlayer("Vyas", seed); //blue
+                IPlayer keith = new MostSymmetricPlayer("Keith"); //red
+                IPlayer jayden = new MachinePlayer("Jayden"); //green
 
                 game.registerPlayer(vyas);
                 game.registerPlayer(keith);
-                game.registerPlayer(robby);
+                game.registerPlayer(jayden);
 
-                Assert.assertFalse(game.playGame(0).isEmpty());
+                Set<Color> winners = game.playGame(0);
+                Assert.assertFalse(winners.isEmpty());
+
+                for (Color winner: winners) {
+                    switch (winner.ordinal()) {
+                        case 0:
+                            blueWins++;
+                            break;
+                        case 1:
+                            redWins++;
+                            break;
+                        case 2:
+                            greenWins++;
+                            break;
+                    }
+                }
             }
             catch (Exception e){
                 System.err.println("Failed with seed " + seed);
                 throw e;
             }
         }
+        System.out.println("random: " + blueWins + " " + "mostSym: " + redWins + " " + "machine: " + greenWins + " ");
     }
 
     @Ignore

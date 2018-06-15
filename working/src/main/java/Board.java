@@ -196,6 +196,10 @@ public class Board {
         return defeatedOpponents;
     }
 
+    public int calculateOpponentsOnFinalSpace(MachinePlayer machinePlayer, Tile tile) {
+        return 0;
+    }
+
     //================================================================================
     // Private Helpers
     //================================================================================
