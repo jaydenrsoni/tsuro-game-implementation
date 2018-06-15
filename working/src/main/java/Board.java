@@ -185,7 +185,7 @@ public class Board {
         return availableStartingLocations.get(startingLocationIndex);
     }
 
-    public int calculateDefeatedOpponents(ScorePlayer player, Tile tile) {
+    public int calculateDefeatedOpponents(APlayer player, Tile tile) {
         Token playerToken = findTokenFromColor(player.getColor());
         BoardSpace currSpace = playerToken.getBoardSpace();
         Set<Token> tokensOnSpace = currSpace.getTokensOnSpace();
@@ -194,15 +194,32 @@ public class Board {
         int defeatedOpponents = 0;
         for (Token token: tokensOnSpace) {
             if (willKillToken(tile, token)) {
-                defeatedOpponents++;
+                if(token.getColor() != player.getColor()){
+                    defeatedOpponents++;
+                }
             }
         }
 
         return defeatedOpponents;
     }
 
-    public int calculateOpponentsOnFinalSpace(MachinePlayer machinePlayer, Tile tile) {
-        return 0;
+    public int calculateOpponentsOnFinalSpace(APlayer player, Tile tile) {
+        Token playerToken = findTokenFromColor(player.getColor());
+        Pair<BoardSpace, Integer> playerAdvancedLocation = findAdvancedLocation(tile, playerToken);
+        int numberOpponentsOnFinalSpace = playerAdvancedLocation.getKey().getTokensOnSpace().size();
+
+        BoardSpace currSpace = playerToken.getBoardSpace();
+        Set<Token> tokensOnCurrentSpace = currSpace.getTokensOnSpace();
+
+        for (Token token : tokensOnCurrentSpace) {
+            if (findAdvancedLocation(tile, token).getKey() == playerAdvancedLocation.getKey()) {
+                if(token.getColor() != player.getColor()){
+                    numberOpponentsOnFinalSpace++;
+                }
+            }
+        }
+
+        return numberOpponentsOnFinalSpace;
     }
 
     //================================================================================
@@ -216,6 +233,25 @@ public class Board {
                 spaces[i][j] = new BoardSpace(i, j);
             }
         }
+    }
+
+    private Pair<BoardSpace, Integer> findAdvancedLocation(Tile tile, Token token){
+        BoardSpace curSpace = token.getBoardSpace();
+        int curTokenSpace = token.getTokenSpace();
+
+        // Trace out a path by moving across spaces with tiles on them
+        while (curSpace.hasTile() || curSpace == token.getBoardSpace()){
+            Tile curTile = getCurTile(curSpace, tile, token);
+
+            curTokenSpace = curTile.findMatch(curTokenSpace);
+            if (isOnEdge(curSpace.getRow(), curSpace.getCol(), curTokenSpace))
+                break;
+
+            curSpace = getNextSpace(curSpace, curTokenSpace);
+            curTokenSpace = Token.getMirroredTokenSpace(curTokenSpace);
+        }
+        // We've walked to a place on the board without a tile
+        return new Pair<BoardSpace, Integer>(curSpace, curTokenSpace);
     }
 
     private boolean willKillToken(Tile tile, Token token){
